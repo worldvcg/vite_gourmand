@@ -6,13 +6,18 @@ const $theme    = document.getElementById('f-theme');
 const $regime   = document.getElementById('f-regime');
 const $minPers  = document.getElementById('f-min-pers');
 
+
+const API_BASE = 'http://localhost:8888/vite_gourmand/back/public/index.php?route=';
+
 let MENUS = [];
 
+
 async function loadMenus() {
-  const res = await fetch('./data/menus.json', { cache: 'no-store' });
+  const res = await fetch(API_BASE + '/api/menus', { cache: 'no-store' });
   MENUS = await res.json();
   render(MENUS);
 }
+
 
 function render(items) {
   $list.innerHTML = '';

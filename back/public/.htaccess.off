@@ -1,0 +1,10 @@
+RewriteEngine On
+RewriteBase /vite_gourmand/back/public/
+
+# Si le fichier/dossier existe, on le sert
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Sinon on envoie tout vers index.php
+RewriteRule ^ index.php [QSA,L]

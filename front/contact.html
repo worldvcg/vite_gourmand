@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Contact – Vite & Gourmand</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+<header class="border-bottom bg-light">
+  <nav class="navbar navbar-expand-lg container">
+    <a class="navbar-brand fw-bold" href="./index.html">Vite & Gourmand</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto gap-2">
+        <li class="nav-item"><a class="nav-link" href="./menus.html">Menus</a></li>
+        <li class="nav-item"><a class="nav-link" href="./login.html">Connexion</a></li>
+        <li class="nav-item"><a class="nav-link active" href="./contact.html">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<main class="container py-5" style="max-width:720px">
+  <h1 class="h4 mb-4">Contact</h1>
+  <div id="contact-alert"></div>
+
+  <form id="contact-form" class="card card-body shadow-sm" novalidate>
+    <div class="mb-3">
+      <label class="form-label" for="c-email">Votre e-mail</label>
+      <input type="email" class="form-control" id="c-email" placeholder="vous@mail.fr" required>
+      <div class="invalid-feedback">Saisissez un e-mail valide.</div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="c-subject">Sujet</label>
+      <input type="text" class="form-control" id="c-subject" placeholder="Sujet de votre demande" required>
+      <div class="invalid-feedback">Sujet requis.</div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="c-message">Message</label>
+      <textarea class="form-control" id="c-message" rows="5" placeholder="Votre message…" required></textarea>
+      <div class="invalid-feedback">Message requis.</div>
+    </div>
+
+    <div class="text-end">
+      <button class="btn btn-primary" type="submit" id="btn-contact">Envoyer</button>
+    </div>
+  </form>
+</main>
+
+<footer class="mt-auto py-4 bg-light border-top">
+  <div class="container small text-muted">© Vite & Gourmand</div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script defer src="./js/contact.js"></script>
+</body>
+</html>
