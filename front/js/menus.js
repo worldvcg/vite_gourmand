@@ -30,7 +30,7 @@ function render(items) {
           <p class="card-text text-muted mb-2">${m.description}</p>
           <div class="small mb-2">Thème : <strong>${m.theme}</strong> • Régime : <strong>${m.regime}</strong></div>
           <div class="small mb-3">Min. personnes : <strong>${m.minPersonnes}</strong> • Prix (min) : <strong>${m.prixBase}€</strong></div>
-          <a href="#" class="btn btn-sm btn-outline-primary">Détails</a>
+          <a href="./detail.html?id=${m.id}" class="btn btn-sm btn-outline-primary">Détails</a>
         </div>
       </div>
     `;
