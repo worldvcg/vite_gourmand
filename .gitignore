@@ -1,0 +1,21 @@
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+
+# Déploiements temporaires
+dist/
+build/
+
+# Node (si jamais tu ajoutes des outils front)
+node_modules/
+
+# Env
+.env
+.env.local
