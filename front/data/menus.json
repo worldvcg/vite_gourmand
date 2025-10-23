@@ -1,0 +1,29 @@
+[
+  {
+    "id": "m1",
+    "titre": "Menu Fête de Noël",
+    "theme": "Noël",
+    "regime": "classique",
+    "description": "Entrée + plat + dessert de saison",
+    "minPersonnes": 6,
+    "prixBase": 180
+  },
+  {
+    "id": "m2",
+    "titre": "Menu Vegan Fraîcheur",
+    "theme": "Classique",
+    "regime": "vegan",
+    "description": "Composé 100% végétal",
+    "minPersonnes": 4,
+    "prixBase": 120
+  },
+  {
+    "id": "m3",
+    "titre": "Brunch Pâques",
+    "theme": "Pâques",
+    "regime": "végétarien",
+    "description": "Sélection printanière",
+    "minPersonnes": 8,
+    "prixBase": 200
+  }
+]
