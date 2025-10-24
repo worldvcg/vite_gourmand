@@ -1,4 +1,5 @@
 const USERS_KEY = 'vg_users';
+const API = 'http://localhost:8888/vite_gourmand/back/public/index.php?route=';
 
 function loadUsers() {
   try { return JSON.parse(localStorage.getItem(USERS_KEY)) || []; }
@@ -34,40 +35,56 @@ function hideAlert(){ $alert.classList.add('d-none'); }
 // Regex mot de passe (exigence sujet)
 const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{10,}$/;
 
-$form.addEventListener('submit', (e)=>{
+$form.addEventListener('submit', async (e) => {
   e.preventDefault();
+  hideAlert();
 
   let ok = true;
-  if(!$first.value.trim()){ $first.classList.add('is-invalid'); ok=false; }
-  if(!$last.value.trim()){  $last.classList.add('is-invalid');  ok=false; }
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($email.value.trim())){
-    $email.classList.add('is-invalid'); ok=false;
+  if (!$first.value.trim()) { $first.classList.add('is-invalid'); ok = false; }
+  if (!$last.value.trim())  { $last.classList.add('is-invalid');  ok = false; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($email.value.trim())) {
+    $email.classList.add('is-invalid'); ok = false;
   }
-  if(!pwdRegex.test($pwd.value)){ $pwd.classList.add('is-invalid'); ok=false; }
-  if($pwd2.value !== $pwd.value || !$pwd2.value){ $pwd2.classList.add('is-invalid'); ok=false; }
+  if (!pwdRegex.test($pwd.value)) { $pwd.classList.add('is-invalid'); ok = false; }
+  if ($pwd2.value !== $pwd.value || !$pwd2.value) { $pwd2.classList.add('is-invalid'); ok = false; }
+  if (!ok) return;
 
-  if(!ok) return;
-
-  const users = loadUsers();
-  const exists = users.some(u => u.email.toLowerCase() === $email.value.trim().toLowerCase());
-  if(exists){
-    showAlert("Cet email est déjà utilisé.");
-    return;
-  }
-
-  const user = {
-    id: uid(),
-    firstName: $first.value.trim(),
-    lastName:  $last.value.trim(),
-    email:     $email.value.trim().toLowerCase(),
-    // ⚠️ Démo front : en clair. En prod: hash côté back (password_hash).
-    password:  $pwd.value,
-    role:      'user'
-  };
-  users.push(user);
-  saveUsers(users);
-
-  showAlert("Compte créé avec succès 🎉 Vous pouvez vous connecter.", "success");
+  // Désactive le bouton pendant l’envoi
   $btn.disabled = true;
-  setTimeout(()=>{ window.location.href = './login.html'; }, 1200);
+  showAlert('Création du compte…', 'info');
+
+  try {
+    const res = await fetch(API + '/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: $email.value.trim().toLowerCase(),
+        password: $pwd.value,
+        first_name: $first.value.trim(),
+        last_name:  $last.value.trim()
+      })
+    });
+
+    // Lis proprement la réponse (JSON ou texte)
+    const ct = (res.headers.get('content-type') || '').toLowerCase();
+    const data = ct.includes('application/json') ? await res.json() : { error: await res.text() };
+
+    if (!res.ok) {
+      // cas fréquents côté API
+      if (res.status === 409) { showAlert('Cet email est déjà utilisé.', 'warning'); $btn.disabled = false; return; }
+      if (res.status === 400) { showAlert('Champs manquants.', 'warning'); $btn.disabled = false; return; }
+      showAlert(data.error || 'Erreur serveur.', 'danger');
+      $btn.disabled = false;
+      return;
+    }
+
+    // Succès
+    showAlert('Compte créé ✅ Vous allez être redirigé vers la connexion…', 'success');
+    setTimeout(() => { window.location.href = './login.html'; }, 900);
+
+  } catch (err) {
+    console.error(err);
+    showAlert('Impossible de contacter le serveur (MAMP/URL ?).', 'danger');
+    $btn.disabled = false;
+  }
 });

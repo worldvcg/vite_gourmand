@@ -100,12 +100,42 @@ class AuthController {
         echo json_encode(['success' => true]);
     }
 
-    private static function getBearerToken() {
-        $headers = getallheaders();
-        if (!isset($headers['Authorization'])) return null;
-        if (preg_match('/Bearer\s(\S+)/', $headers['Authorization'], $matches)) {
-            return $matches[1];
+private static function getBearerToken() {
+    // 1) Essayer via variables serveur courantes
+    $auth = $_SERVER['HTTP_AUTHORIZATION'] ?? null;
+    if (!$auth) $auth = $_SERVER['Authorization'] ?? null;
+    if (!$auth) $auth = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? null;
+
+    // 2) Polyfill getallheaders() si dispo
+    if (!$auth) {
+        if (!function_exists('getallheaders')) {
+            function getallheaders() {
+                $headers = [];
+                foreach ($_SERVER as $name => $value) {
+                    if (strpos($name, 'HTTP_') === 0) {
+                        $key = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))));
+                        $headers[$key] = $value;
+                    }
+                }
+                return $headers;
+            }
         }
-        return null;
+        $headers = getallheaders();
+        if (isset($headers['Authorization'])) {
+            $auth = $headers['Authorization'];
+        }
     }
+
+    // 3) Bearer <token>
+    if ($auth && preg_match('/Bearer\s+(\S+)/', $auth, $m)) {
+        return $m[1];
+    }
+
+    // 4) Filet de sécurité : accepter aussi ?token=... (pratique pour debug)
+    if (!empty($_GET['token'])) {
+        return $_GET['token'];
+    }
+
+    return null;
+}
 }

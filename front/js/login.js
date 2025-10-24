@@ -54,44 +54,52 @@
     return ok;
   }
 
-  // Soumission → appel API /api/auth/login
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    clearAlert();
-    if (!validate()) return;
+// Soumission → appel API /api/auth/login
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearAlert();
+  if (!validate()) return;
 
-    try {
-      btnLogin.disabled = true;
-      showAlert('Connexion…', 'info');
+  try {
+    btnLogin.disabled = true;
+    showAlert('Connexion…', 'info');
 
-      const res = await fetch(API + '/api/auth/login', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({
-          email: emailInput.value.trim(),
-          password: pwdInput.value
-        })
-      });
+    const res = await fetch(API + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        email: emailInput.value.trim(),
+        password: pwdInput.value
+      })
+    });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Erreur de connexion');
+    // Lire la réponse de façon robuste (JSON ou texte)
+    const ct = (res.headers.get('content-type') || '').toLowerCase();
+    const payload = ct.includes('application/json')
+      ? await res.json()
+      : { error: await res.text() };
 
-      // ✅ Stocker token + user
-      localStorage.setItem('authToken', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-
-      // Option “se souvenir de moi” : rien à faire pour le token (on le garde en localStorage)
-      // (si tu voulais une session courte, tu pourrais à la place utiliser sessionStorage)
-
-      // Redirection (support ?next=...)
-      const params = new URLSearchParams(location.search);
-      const next = params.get('next') || './index.html';
-      showAlert('Connecté ✅ Redirection…', 'success');
-      setTimeout(() => location.href = next, 300);
-    } catch (err) {
-      showAlert(err.message, 'danger');
-    } finally {
-      btnLogin.disabled = false;
+    if (!res.ok) {
+      throw new Error(payload.error || 'Erreur de connexion');
     }
-  });
+
+    // ✅ Stocker token + user
+    localStorage.setItem('authToken', payload.token);
+    localStorage.setItem('user', JSON.stringify(payload.user));
+
+    // ✅ Calculer la redirection AVANT et ne la faire qu’UNE seule fois
+    const next = new URLSearchParams(location.search).get('next') || './account.html';
+    // Petit feedback visuel (optionnel)
+    showAlert('Connecté ✅ Redirection…', 'success');
+
+    // Rediriger proprement
+    window.location.href = next;
+    return; // éviter tout code après
+
+  } catch (err) {
+    showAlert(err.message, 'danger');
+  } finally {
+    btnLogin.disabled = false;
+  }
+});
 })();
