@@ -1,0 +1,79 @@
+:root {
+  --vg-primary: #f5A623;
+  --vg-secondary: #81C784;
+  --vg-text: #333333;
+  --vg-bg: #FAFAFA;
+}
+
+body {
+  color: var(--vg-text);
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--vg-primary);
+  --bs-btn-border-color: var(--vg-primary);
+  --bs-btn-hover-bg: #e08f0f;
+  --bs-btn-hover-border-color: #e08f0f;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--vg-primary);
+  --bs-btn-border-color: var(--vg-primary);
+  --bs-btn-hover-bg: var(--vg-primary);
+  --bs-btn-hover-border-color: var(--vg-primary);
+  --bs-btn-hover-color: #fff;
+}
+
+.bg-soft {
+  background: rgba(245, 166, 35, 0.06);
+}
+
+/* HERO */
+.hero {
+  min-height: 62vh;
+  display: grid;
+  place-items: center;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  -o-object-fit: cover;
+     object-fit: cover;
+  filter: brightness(0.6);
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.55));
+}
+
+.hero-content {
+  z-index: 1;
+}
+
+/* Bloc CTA translucide */
+.cta {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* Lien actif navbar (optionnel) */
+.nav-link.active {
+  color: var(--vg-primary) !important;
+  font-weight: 600;
+}
+
+ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin-left: 0;
+}
+
+.my-icon {
+  color: #F5A623; /* ton orange */
+  font-size: 50px;
+}/*# sourceMappingURL=css.css.map */

@@ -4,21 +4,19 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Vite & Gourmand</title>
-
-  <!-- Bootstrap (CDN) -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+ <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
     rel="stylesheet"
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-    crossorigin="anonymous"
-  />
+    crossorigin="anonymous"/>
+    <link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"/>
   <!-- Styles perso -->
-  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/css.css"/>
 </head>
 <body>
   <header class="border-bottom bg-light">
     <nav class="navbar navbar-expand-lg container">
-      <a class="navbar-brand fw-bold" href="#">Vite & Gourmand</a>
+      <a class="navbar-brand ms-3" href="index.html">Vite & Gourmand</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -33,18 +31,96 @@
     </nav>
   </header>
 
-  <main class="container py-5">
-    <h1 class="mb-3">Bienvenue chez Vite & Gourmand</h1>
-    <p class="text-muted">Site en préparation — environnement OK.</p>
+  <main>
 
-    <div class="alert alert-info">Si vous voyez cette page, tout est bien configuré 🎉</div>
-  </main>
-
-  <footer class="mt-auto py-4 bg-light border-top">
-    <div class="container small text-muted">
-      © Vite & Gourmand — Bordeaux • <a href="#" class="text-decoration-none">Mentions légales</a>
+  <!-- HERO -->
+  <section class="hero position-relative text-white">
+    <img class="hero-bg" src="./images/photo-1751651054945-882d49cbdbfc.jpeg" alt="Buffet Vite & Gourmand" />
+    <div class="hero-overlay"></div>
+    <div class="container position-relative hero-content text-center">
+      <h1 class="display-5 fw-bold mb-3">Des menus sur mesure pour tous vos événements</h1>
+      <p class="lead mb-4">25 ans d’expertise : mariages, entreprises, Noël, Pâques…</p>
+      <a href="./menus.html" class="btn btn-lg btn-primary shadow">Découvrir nos menus</a>
     </div>
-  </footer>
+  </section>
+
+  <!-- PRÉSENTATION -->
+  <section class="py-5">
+    <div class="container">
+      <div class="row align-items-center g-4">
+        <div class="col-12 col-lg-6">
+          <img class="img-fluid rounded-4 shadow-sm" src="./images/photo-1620641606872-f9641b65adab.jpeg" alt="Équipe et plats">
+        </div>
+        <div class="col-12 col-lg-6">
+          <h2 class="h3 mb-3 text-black">25 ans d'expérience en restauration événementielle</h2>
+          <p class="mb-3">
+            Depuis 1999, Vite & Gourmand accompagne vos événements professionnels et privés avec des prestations de qualité supérieure. Notre équipe de chefs passionnés crée des menus personnalisés qui subliment chaque occasion.
+          </p>
+          <p class="text-black mb-4">
+            Que ce soit pour un cocktail d'entreprise, un mariage ou un séminaire, nous mettons notre savoir-faire à votre service pour faire de votre événement un moment inoubliable.
+          </p>
+          <a href="./contact.html" class="btn btn-outline-primary mb-5">Nous contacter</a>
+          <ul class="accent-dots " aria-hidden="true">
+          <li class="bi bi-check-circle my-icon"></li>
+          <li class="bi bi-check-circle my-icon"></li>
+          <li class="bi bi-check-circle my-icon"></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+ 
+  <!-- AVIS CLIENTS -->
+  <section class="py-5 bg-soft">
+    <div class="container">
+      <h2 class="h1 mb-1 text-black text-center">Ce que disent nos client</h2>
+      <p class="mb-5 text-black text-center">Leur satisfaction est notre plus belle récompense</p>
+      <div class="row g-4">
+        <div class="col-12 col-md-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <div class="mb-2 text-warning">★★★★★</div>
+              <p class="mb-3">“Service impeccable et menu délicieux pour notre mariage.”</p>
+              <div class="small text-muted">— Clara & Hugo</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <div class="mb-2 text-warning">★★★★★</div>
+              <p class="mb-3">“Parfait pour notre séminaire. Pro, réactifs et très bon !”</p>
+              <div class="small text-muted">— Julie, RH</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <div class="mb-2 text-warning">★★★★★</div>
+              <p class="mb-3">“Menu de Noël exceptionnel : présentation et goûts au top.”</p>
+              <div class="small text-muted">— Famille Moreau</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="text-center mt-4 mb-0">
+        <a href="./contact.html" class="btn btn-primary">Déposer un avis</a>
+      </p>
+    </div>
+  </section>
+
+</main>
+
+  <footer class="mt-auto py-4 bg-white border-top">
+  <div class="container small d-flex flex-column flex-md-row justify-content-between gap-2">
+    <div>© Vite & Gourmand — Bordeaux</div>
+    <div class="text-muted">contact@vite-gourmand.fr • Lun–Dim : 9h–19h</div>
+    <div>
+      <a class="text-decoration-none me-3" href="./mentions.html">Mentions légales</a>
+      <a class="text-decoration-none" href="./cgv.html">CGV</a>
+    </div>
+  </div>
+</footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
           integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
@@ -53,3 +129,4 @@
   <script src="./js/nav-auth.js" defer></script>
 </body>
 </html>
+

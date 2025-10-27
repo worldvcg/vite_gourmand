@@ -1,7 +1,0 @@
-:root{
-  --primary:#4F7F42; /* vert chic */
-  --dark:#212529;
-}
-body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
-h1,h2,h3 { color: var(--dark); }
-.navbar-brand{ color: var(--primary); }
