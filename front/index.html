@@ -25,7 +25,11 @@
           <li class="nav-item"><a class="nav-link" href="./index.html">Accueil</a></li>
           <li class="nav-item"><a class="nav-link" href="./menus.html">Menus</a></li>
           <li class="nav-item"><a class="nav-link" href="./contact.html">Contact</a></li>
-          <li class="nav-item "><a class="nav-link btn btn-lg btn-primary px-3 py-2 text-white" href="./login.html">Connexion</a></li>
+          <li id="btn-login" class="nav-item"><a class="nav-link btn btn-lg btn-primary px-3 py-2 text-white"href="./login.html">Connexion</a></li>
+          <li id="btn-account" class="nav-item d-none"><a class="nav-link" href="./account.html">Mon espace</a></li>
+          <li id="btn-logout" class="nav-item"><a class="nav-link btn btn-lg px-3 py-2 text-white btn-logout" href="#">Déconnexion</a></li>
+          <li id="nav-admin" class="nav-item d-none"><a href="./admin.html" class="nav-link">Admin</a></li>
+          <li id="nav-employe" class="nav-item d-none"><a href="./employe.html" class="nav-link">Espace Employé</a></li>
         </ul>
       </div>
     </nav>
@@ -120,16 +124,40 @@
 
 </main>
 
-  <footer class="mt-auto py-4 bg-white border-top">
-  <div class="container small d-flex flex-column flex-md-row justify-content-between gap-2">
-    <div>© Vite & Gourmand — Bordeaux</div>
-    <div class="text-muted">contact@vite-gourmand.fr • Lun–Dim : 9h–19h</div>
-    <div>
-      <a class="text-decoration-none me-3" href="./mentions.html">Mentions légales</a>
-      <a class="text-decoration-none" href="./cgv.html">CGV</a>
+  <footer class="mt-auto py-5 border-top" style="background:#F3F4F6">
+    <div class="container small">
+      <div class="row gy-3">
+        <div class="col-md-3">
+          <div class="fw-semibold mb-2 text-primary">Vite & Gourmand</div>
+          <div class="text-muted">Votre partenaire de confiance pour la restauration événementielle depuis 25 ans.</div>
+        </div>
+        <div class="col-md-3">
+          <div class="fw-semibold mb-2">Contact</div>
+          <div class="text-muted">📞 01 23 45 67 89</div>
+          <div class="text-muted">✉️ contact@vite-gourmand.fr</div>
+          <div class="text-muted">📍 123 Avenue de la République, 75011 Paris</div>
+        </div>
+        <div class="col-md-3">
+          <div class="fw-semibold mb-2">Horaires</div>
+          <div class="text-muted">Lundi – Dimanche</div>
+          <div class="text-muted">9h00 - 18h00</div>
+          <div class="text-muted">Sur rendez-vous uniquement</div>
+        </div>
+      <div class="col-md-3 align-items-start justify-content-md-end gap-3 footer-socials">
+      <div class="fw-semibold mb-2">Suivez-nous</div>
+      <div class="d-flex gap-3">
+        <a href="#" class="social-icon"><i class="bi bi-instagram"></i></a>
+        <a href="#" class="social-icon"><i class="bi bi-facebook"></i></a>
+        <a href="#" class="social-icon"><i class="bi bi-briefcase-fill"></i></a>
+      </div>
+     </div>
+      <hr class="my-4" />
+      <div class="d-flex justify-content-between flex-wrap gap-2 text-muted">
+        <div>© Vite & Gourmand</div>
+        <div><a class="text-decoration-none" href="./mentions.html">Mentions légales</a></div>
+      </div>
     </div>
-  </div>
-</footer>
+  </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
           integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"

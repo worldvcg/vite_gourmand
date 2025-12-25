@@ -1,5 +1,5 @@
 (() => {
-  const API = 'http://localhost:8888/vite_gourmand/back/public/index.php?route=';
+  const API = 'http://localhost:9000/index.php?route=';
 
   const form = document.getElementById('login-form');
   const emailInput = document.getElementById('email');
@@ -87,13 +87,11 @@ form.addEventListener('submit', async (e) => {
     localStorage.setItem('authToken', payload.token);
     localStorage.setItem('user', JSON.stringify(payload.user));
 
-    // ✅ Calculer la redirection AVANT et ne la faire qu’UNE seule fois
-    const next = new URLSearchParams(location.search).get('next') || './account.html';
-    // Petit feedback visuel (optionnel)
-    showAlert('Connecté ✅ Redirection…', 'success');
+    const BASE = 'http://localhost:8888/vite_gourmand/front/';
+    const next = new URLSearchParams(location.search).get('next') || (BASE + 'account.html');
 
-    // Rediriger proprement
-    window.location.href = next;
+// 🔒 redirection propre (pas d’historique pollué)
+window.location.replace(next);
     return; // éviter tout code après
 
   } catch (err) {

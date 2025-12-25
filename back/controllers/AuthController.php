@@ -38,7 +38,7 @@ class AuthController {
         }
 
         $pdo = pdo();
-        $stmt = $pdo->prepare("SELECT id, email, password_hash, first_name, last_name FROM users WHERE email = ?");
+        $stmt = $pdo->prepare("SELECT id, email, password_hash, first_name, last_name, role FROM users WHERE email = ?");
         $stmt->execute([$data['email']]);
         $user = $stmt->fetch();
 
@@ -58,7 +58,8 @@ class AuthController {
                 'id' => $user['id'],
                 'email' => $user['email'],
                 'first_name' => $user['first_name'],
-                'last_name' => $user['last_name']
+                'last_name' => $user['last_name'],
+                'role' => $user['role']
             ]
         ]);
     }
@@ -73,7 +74,7 @@ class AuthController {
         }
 
         $pdo = pdo();
-        $stmt = $pdo->prepare("SELECT u.id, u.email, u.first_name, u.last_name 
+        $stmt = $pdo->prepare("SELECT u.id, u.email, u.first_name, u.last_name, u.role 
                                FROM user_tokens t 
                                JOIN users u ON u.id = t.user_id
                                WHERE t.token = ?");
@@ -100,7 +101,7 @@ class AuthController {
         echo json_encode(['success' => true]);
     }
 
-private static function getBearerToken() {
+public static function getBearerToken() {
     // 1) Essayer via variables serveur courantes
     $auth = $_SERVER['HTTP_AUTHORIZATION'] ?? null;
     if (!$auth) $auth = $_SERVER['Authorization'] ?? null;
@@ -131,7 +132,7 @@ private static function getBearerToken() {
         return $m[1];
     }
 
-    // 4) Filet de sécurité : accepter aussi ?token=... (pratique pour debug)
+    // 4) Debug : ?token=...
     if (!empty($_GET['token'])) {
         return $_GET['token'];
     }

@@ -1,5 +1,5 @@
 (() => {
-  const API_BASE = 'http://localhost:8888/vite_gourmand/back/public/index.php?route=';
+  const API = 'http://localhost:9000/index.php?route=';
 
   const $form  = document.getElementById('contact-form');
   const $email = document.getElementById('c-email');

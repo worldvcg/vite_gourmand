@@ -1,5 +1,5 @@
 const USERS_KEY = 'vg_users';
-const API = 'http://localhost:8888/vite_gourmand/back/public/index.php?route=';
+const API = 'http://localhost:9000/index.php?route=';
 
 function loadUsers() {
   try { return JSON.parse(localStorage.getItem(USERS_KEY)) || []; }
