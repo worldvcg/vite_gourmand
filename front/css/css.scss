@@ -12,6 +12,10 @@
   --gray-600: #4B5563;
   --gray-500: #6B7280;
 
+  /* REDS */
+  --red-700: #DC2626;
+  --red-800: #9B1C1C;
+
   /* BACKGROUNDS */
   --white: #FFFFFF;
   --gray-50: #F9FAFB;
@@ -30,6 +34,10 @@
   --vg-primary: var(--orange-600);
   --vg-primary-hover: var(--orange-700);
   --vg-text: var(--gray-600);
+
+  /*DANGER */
+  --vg-danger: var(--red-700);
+  --vg-danger-hover: var(--red-800);
 }
 
 /* ============================
@@ -66,6 +74,27 @@ body {
 .btn:hover {
   opacity: 0.9;
   transform: translateY(-1px);
+}
+
+/* =========================
+   BOUTON DÉCONNEXION (ROUGE)
+   ========================= */
+
+.btn-logout {
+  background-color: var(--vg-danger) !important;
+  border-color: var(--vg-danger) !important;
+  color: #fff !important;
+
+  --bs-btn-bg: var(--vg-danger);
+  --bs-btn-border-color: var(--vg-danger);
+  --bs-btn-hover-bg: var(--vg-danger-hover);
+  --bs-btn-hover-border-color: var(--vg-danger-hover);
+  --bs-btn-hover-color: #fff;
+}
+
+.btn-logout:hover {
+  background-color: var(--vg-danger-hover) !important;
+  border-color: var(--vg-danger-hover) !important;
 }
 
 /*HERO*/
@@ -137,4 +166,187 @@ footer {
 }
 
 
+.menu-card{border-radius:14px;overflow:hidden;background:#fff}
+.menu-card .card-img-top{height:175px;object-fit:cover}
+.menu-card .card-title{font-weight:600;color:var(--gray-900)}
+.menu-card .card-text{color:var(--gray-600)}
+.menu-price{font-size:.95rem;color:var(--orange-600)}
 
+
+#filters .form-label{font-weight:600;color:var(--gray-700)}
+#filters input,#filters select{
+  border-radius:10px;
+  border:1px solid var(--gray-300);
+  min-height:45px;
+}
+
+
+.footer-socials a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;        /* Taille du cercle */
+  height: 42px;
+
+  border-radius: 50%; /* Cercle parfait */
+
+  background: var(--orange-100); /* Fond orange doux */
+  color: var(--orange-600);      /* Icône orange foncé */
+
+  text-decoration: none;
+  font-size: 22px;    /* Taille de l'icône */
+  transition: 0.25s ease-in-out;
+}
+
+/* Effet au survol */
+.footer-socials a:hover {
+  background: var(--orange-600); /* Fond orange fort */
+  color: white;                  /* Icône blanche */
+  transform: scale(1.08);        /* Zoom léger */
+}
+
+/* ============================================
+   MON ESPACE — STYLE COMPATIBLE MAQUETTE
+============================================ */
+.mon-espace-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+
+  background: var(--overlay-light);
+  backdrop-filter: blur(6px);
+
+  border-radius: 20px;
+  border: 1px solid var(--gray-200);
+
+  box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+}
+
+.mon-espace-container h1,
+.mon-espace-container h2 {
+  color: var(--gray-900);
+  font-weight: 600;
+  text-align: center;
+}
+
+
+/* ==== SECTIONS ==== */
+.mon-espace-container section {
+  margin-top: 25px;
+  padding: 20px;
+  background: rgba(255,255,255,0.70);
+  border-radius: 16px;
+  border: 1px solid var(--gray-200);
+}
+
+
+/* ==== LISTE DES COMMANDES ==== */
+.liste-commandes .commande {
+  background: var(--white);
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid var(--gray-200);
+
+  margin-bottom: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.liste-commandes .commande h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.cmd-actions {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* ==== BOUTONS COMMANDES ==== */
+.btn-modifier,
+.btn-annuler,
+.btn-suivi,
+.btn-avis {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+
+  transition: 0.25s;
+}
+
+.btn-modifier { background: var(--orange-500); color: white; }
+.btn-annuler  { background: #e53935; color: white; }
+.btn-suivi    { background: var(--orange-600); color: white; }
+.btn-avis     { background: var(--orange-700); color: white; }
+
+.btn-modifier:hover,
+.btn-annuler:hover,
+.btn-suivi:hover,
+.btn-avis:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* ==== ALERTES ==== */
+.alert {
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.alert-danger { background: #ffdfdf; color: #a20000; border: 1px solid #ffb9b9; }
+.alert-success { background: #d9ffd9; color: #007a0a; border: 1px solid #baffba; }
+
+.d-none { display: none !important; }
+
+/* ==== FORMULAIRE AVIS ==== */
+.donner-avis input,
+.donner-avis textarea {
+  width: 100%;
+  margin-top: 6px;
+  margin-bottom: 15px;
+  padding: 10px;
+
+  border-radius: 10px;
+  border: 1px solid var(--gray-300);
+  background: var(--white);
+  color: var(--gray-700);
+}
+
+.donner-avis button {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  background: var(--orange-600);
+  color: white;
+}
+
+.donner-avis button:hover {
+  background: var(--orange-700);
+  transform: translateY(-1px);
+}
+
+/* ==== RESPONSIVE ==== */
+@media (max-width: 700px) {
+  .mon-espace-container {
+    padding: 15px;
+    margin: 15px;
+  }
+
+  .cmd-actions {
+    flex-direction: column;
+  }
+
+  .bouton {
+    width: 100%;
+  }
+}

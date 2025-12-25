@@ -34,54 +34,104 @@
       </div>
     </nav>
   </header>
- <main class="container py-4">
-    <h1 class="mb-4">Nos menus</h1>
 
-    <!-- Filtres -->
-    <form id="filters" class="row gy-3 gx-3 align-items-end mb-4">
-      <div class="col-sm-3">
-        <label class="form-label">Prix max (€)</label>
-        <input type="number" class="form-control" min="1" id="f-price-max" placeholder="ex: 200">
-      </div>
+<main class="container py-5" style="max-width:800px;">
 
-      <div class="col-sm-3">
-        <label class="form-label">Fourchette (€)</label>
-        <div class="d-flex gap-2">
-          <input type="number" class="form-control" id="f-price-min" min="1" placeholder="min">
-          <input type="number" class="form-control" id="f-price-to" min="1" placeholder="max">
+  <div class="bg-white p-4 rounded shadow-sm">
+    <h1 class="mb-4">Commande du menu</h1>
+
+    <div id="order-alert" class="alert d-none"></div>
+
+    <form id="order-form">
+
+      <h4>Informations client</h4>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label>Prénom</label>
+          <input type="text" id="ord-first" class="form-control" disabled>
+        </div>
+        <div class="col-md-6">
+          <label>Nom</label>
+          <input type="text" id="ord-last" class="form-control" disabled>
+        </div>
+        <div class="col-md-6">
+          <label>Email</label>
+          <input type="email" id="ord-email" class="form-control" disabled>
+        </div>
+        <div class="col-md-6">
+          <label>GSM</label>
+          <input type="text" id="ord-phone" class="form-control" disabled>
         </div>
       </div>
 
-      <div class="col-sm-3">
-        <label class="form-label">Thème</label>
-        <select class="form-select" id="f-theme">
-          <option value="">Tous</option>
-          <option value="Noël">Noël</option>
-          <option value="Pâques">Pâques</option>
-          <option value="Classique">Classique</option>
-          <option value="Évènement">Évènement</option>
-        </select>
+      <hr class="my-4">
+
+      <h4>Adresse & Livraison</h4>
+
+      <div class="row g-3">
+        <div class="col-12">
+          <label>Adresse</label>
+          <input type="text" id="ord-address" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label>Ville</label>
+          <input type="text" id="ord-city" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label>Date livraison</label>
+          <input type="date" id="ord-date" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label>Heure livraison</label>
+          <input type="time" id="ord-time" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label>Lieu</label>
+          <input type="text" id="ord-place" class="form-control" required>
+        </div>
       </div>
 
-      <div class="col-sm-2">
-        <label class="form-label">Régime</label>
-        <select class="form-select" id="f-regime">
-          <option value="">Tous</option>
-          <option value="classique">classique</option>
-          <option value="végétarien">végétarien</option>
-          <option value="vegan">vegan</option>
-        </select>
+      <hr class="my-4">
+
+      <h4>Détails commande</h4>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label>Menu sélectionné</label>
+          <input type="text" id="ord-menu" class="form-control" disabled>
+        </div>
+        <div class="col-md-6">
+          <label>Nombre de personnes</label>
+          <input type="number" id="ord-persons" class="form-control" min="1" required>
+        </div>
       </div>
 
-      <div class="col-sm-1">
-        <label class="form-label">Min pers.</label>
-        <input type="number" class="form-control" min="1" id="f-min-pers" placeholder="min">
+      <div class="bg-light p-3 mt-4 rounded">
+        <p>💰 Prix menu : <strong id="price-menu">0 €</strong></p>
+        <p>🚚 Livraison : <strong id="price-delivery">0 €</strong></p>
+        <p class="fw-bold">Total : <span id="price-total">0 €</span></p>
       </div>
+
+       <hr class="my-4" />
+
+<h4>Paiement</h4>
+<div class="row g-3">
+  <div class="col-md-6">
+    <label class="form-label">Moyen de paiement</label>
+    <select id="ord-payment" class="form-select" required>
+      <option value="" selected disabled>Choisir…</option>
+      <option value="card">Carte (simulation)</option>
+      <option value="cash">Espèces (à la livraison)</option>
+      <option value="transfer">Virement</option>
+    </select>
+  </div>
+</div>
+
+      <button class="btn btn-primary mt-4">Valider la commande</button>
     </form>
+  </div>
 
-    <!-- Liste des menus -->
-    <div id="menus-list" class="row g-3"></div>
-  </main>
+</main>
 
 <footer class="mt-auto py-5 border-top" style="background:#F3F4F6">
     <div class="container small">
@@ -117,9 +167,8 @@
       </div>
     </div>
   </footer>
-<!-- JS Bootstrap éventuel -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="./js/menus.js"></script>
-<script src="./js/nav-auth.js" defer></script>
+
+<script src="./js/commande.js"></script>
+<script src="./js/nav-auth.js"></script>
 </body>
 </html>
