@@ -10,6 +10,7 @@
     crossorigin="anonymous"/>
     <link rel="stylesheet"
   href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"/>
+  
   <!-- Styles perso -->
   <link rel="stylesheet" href="./css/css.css"/>
 </head>
@@ -53,6 +54,19 @@
 
   <hr class="my-5">
 
+  <!-- PLATS -->
+<h2 class="mb-3">Plats</h2>
+
+<div class="d-flex justify-content-end mb-3">
+  <button class="btn btn-primary" id="btn-add-dish">
+    <i class="bi bi-plus-circle me-1"></i> Ajouter un plat
+  </button>
+</div>
+
+<div id="dishes-list"></div>
+
+<hr class="my-5">
+
   <!-- COMMANDES -->
   <h2 class="mb-3">Commandes</h2>
 
@@ -84,6 +98,47 @@
   </div>
 
   <div id="orders-list"></div>
+
+  <hr class="my-5">
+
+  <section class="reviews-section mt-5">
+  <h2 class="mb-3">Avis à modérer</h2>
+
+  <div class="row g-2 mb-3">
+    <div class="col-md-4">
+      <label class="form-label">Filtrer</label>
+      <select id="f-review-status" class="form-select">
+        <option value="">Tous</option>
+        <option value="pending">En attente</option>
+        <option value="approved">Validés</option>
+        <option value="rejected">Refusés</option>
+      </select>
+    </div>
+
+    <div class="col-md-4 d-flex align-items-end">
+      <button id="btn-refresh-reviews" class="btn btn-primary w-100">
+        Rafraîchir
+      </button>
+    </div>
+  </div>
+
+  <div id="reviews-list" class="reviews-list"></div>
+</section>
+
+<hr class="my-5">
+
+<!-- HORAIRES -->
+<h2 class="mb-3">Horaires d’ouverture</h2>
+
+<div class="row g-2 mb-3 align-items-end">
+  <div class="col-md-4">
+    <button id="btn-refresh-hours" class="btn btn-primary w-100">
+      Rafraîchir
+    </button>
+  </div>
+</div>
+
+<div id="hours-list"></div>
 
 </main>
 
@@ -187,29 +242,84 @@
   </div>
 </div>
 
-<section class="reviews-section mt-5">
-  <h2 class="mb-3">Avis à modérer</h2>
+<div class="modal fade" id="dishModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <form id="dishForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="dishModalTitle">Ajouter un plat</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
 
-  <div class="row g-2 mb-3">
-    <div class="col-md-4">
-      <label class="form-label">Filtrer</label>
-      <select id="f-review-status" class="form-select">
-        <option value="">Tous</option>
-        <option value="pending">En attente</option>
-        <option value="approved">Validés</option>
-        <option value="rejected">Refusés</option>
-      </select>
-    </div>
+        <div class="modal-body">
+          <input type="hidden" id="dish-id">
 
-    <div class="col-md-4 d-flex align-items-end">
-      <button id="btn-refresh-reviews" class="btn btn-primary w-100">
-        Rafraîchir
-      </button>
+          <div class="mb-3">
+            <label class="form-label">Nom</label>
+            <input id="dish-name" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Type</label>
+            <select id="dish-type" class="form-select" required>
+              <option value="entree">Entrée</option>
+              <option value="plat">Plat</option>
+              <option value="dessert">Dessert</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea id="dish-description" class="form-control" rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </form>
     </div>
   </div>
+</div>
 
-  <div id="reviews-list" class="reviews-list"></div>
-</section>
+<div class="modal fade" id="hoursModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form id="hoursForm">
+        <div class="modal-header">
+          <h5 class="modal-title">Modifier les horaires</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" id="hours-id">
+
+          <div class="mb-2">
+            <label class="form-label">Jour</label>
+            <input id="hours-day" class="form-control" disabled>
+          </div>
+
+          <div class="row g-2">
+            <div class="col-6">
+              <label class="form-label">Ouverture</label>
+              <input id="hours-open" type="time" class="form-control" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Fermeture</label>
+              <input id="hours-close" type="time" class="form-control" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 <!-- PROTECTION ROLE -->
 <script>

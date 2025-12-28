@@ -392,3 +392,19 @@ footer {
     padding: 0 10px;
   }
 }
+
+
+/* Même style que commandes */
+.employee-card {
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 10px;
+  padding: 16px;
+  background: #fff;
+}
+
+/* Boutons fins comme "Mettre à jour" */
+.btn-thin {
+  padding: .35rem .75rem;
+  font-size: .9rem;
+  border-radius: .4rem;
+}

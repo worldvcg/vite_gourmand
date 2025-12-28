@@ -495,8 +495,297 @@ async function moderateReview(id, status) {
   }
 }
 
-btnRefreshReviews?.addEventListener('click', loadReviews);
-fReviewStatus?.addEventListener('change', loadReviews);
+// =====================
+// OPENING HOURS
+// =====================
+const hoursBox = document.getElementById('hours-list');
+const btnRefreshHours = document.getElementById('btn-refresh-hours');
+
+const hoursModalEl = document.getElementById('hoursModal');
+const hoursModal = hoursModalEl ? new bootstrap.Modal(hoursModalEl) : null;
+
+async function loadHours() {
+  if (!hoursBox) return;
+
+  try {
+    const res = await fetch('http://localhost:9000/index.php?route=/api/opening-hours', { cache: 'no-store' });
+    const data = await res.json();
+
+    if (!res.ok) {
+      hoursBox.innerHTML = `<div class="alert alert-danger">Erreur chargement horaires</div>`;
+      return;
+    }
+
+    renderHours(Array.isArray(data) ? data : []);
+  } catch (e) {
+    console.error(e);
+    hoursBox.innerHTML = `<div class="alert alert-danger">Impossible de charger les horaires</div>`;
+  }
+}
+
+function renderHours(items) {
+  hoursBox.innerHTML = '';
+
+  if (!items.length) {
+    hoursBox.innerHTML = `<div class="alert alert-info">Aucun horaire</div>`;
+    return;
+  }
+
+  items.forEach(h => {
+    const div = document.createElement('div');
+    div.className = 'card p-3 mb-3';
+
+    div.innerHTML = `
+      <div class="d-flex justify-content-between align-items-center gap-3">
+        <div>
+          <strong>${h.day_name || h.day || 'Jour'}</strong>
+          <div class="text-muted small">
+            ${(h.open_time ?? h.open ?? '--:--')} — ${(h.close_time ?? h.close ?? '--:--')}
+          </div>
+        </div>
+
+        <button class="btn btn-sm btn-primary js-edit-hours"
+          data-id="${h.id}"
+          data-day="${h.day_name || h.day || ''}"
+          data-open="${h.open_time ?? h.open ?? ''}"
+          data-close="${h.close_time ?? h.close ?? ''}">
+          Modifier
+        </button>
+      </div>
+    `;
+
+    hoursBox.appendChild(div);
+  });
+
+  hoursBox.querySelectorAll('.js-edit-hours').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!hoursModal) return setAlert('danger', 'Modal horaires introuvable (#hoursModal)');
+
+      document.getElementById('hours-id').value = btn.dataset.id;
+      document.getElementById('hours-day').value = btn.dataset.day;
+      document.getElementById('hours-open').value = btn.dataset.open;
+      document.getElementById('hours-close').value = btn.dataset.close;
+
+      hoursModal.show();
+    });
+  });
+}
+
+document.getElementById('hoursForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const id = document.getElementById('hours-id').value;
+  const open_time = document.getElementById('hours-open').value;
+  const close_time = document.getElementById('hours-close').value;
+
+  try {
+    const res = await fetch(`http://localhost:9000/index.php?route=/api/opening-hours/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+      open: open_time,
+      close: close_time
+       })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setAlert('danger', data.error || 'Erreur mise à jour horaires');
+      return;
+    }
+
+    hoursModal?.hide();
+    setAlert('success', 'Horaires mis à jour ✅');
+    loadHours();
+  } catch (e) {
+    console.error(e);
+    setAlert('danger', 'Erreur réseau (horaires)');
+  }
+});
+
+  btnRefreshHours?.addEventListener('click', loadHours);
+  btnRefreshReviews?.addEventListener('click', loadReviews);
+  fReviewStatus?.addEventListener('change', loadReviews);
+
+// =====================
+// DISHES
+// =====================
+const dishesBox = document.getElementById('dishes-list');
+const btnAddDish = document.getElementById('btn-add-dish');
+
+const dishModalEl = document.getElementById('dishModal');
+const dishModal = dishModalEl ? new bootstrap.Modal(dishModalEl) : null;
+
+const dishForm = document.getElementById('dishForm');
+const in_dish_id = document.getElementById('dish-id');
+const in_dish_name = document.getElementById('dish-name');
+const in_dish_type = document.getElementById('dish-type');
+const in_dish_description = document.getElementById('dish-description');
+
+let DISHES = [];
+
+async function loadDishes() {
+  if (!dishesBox) return;
+
+  try {
+    const res = await fetch('http://localhost:9000/index.php?route=/api/dishes', { cache: 'no-store' });
+    const data = await res.json();
+
+    if (!res.ok) {
+      dishesBox.innerHTML = `<div class="alert alert-danger">Erreur chargement plats</div>`;
+      return;
+    }
+
+    DISHES = Array.isArray(data) ? data : [];
+    renderDishes(DISHES);
+  } catch (e) {
+    console.error(e);
+    dishesBox.innerHTML = `<div class="alert alert-danger">Impossible de charger les plats</div>`;
+  }
+}
+
+function labelType(t) {
+  const v = String(t || '').toLowerCase();
+  if (v === 'entree' || v === 'entrée') return 'Entrée';
+  if (v === 'plat') return 'Plat';
+  if (v === 'dessert') return 'Dessert';
+  return t || '—';
+}
+
+function renderDishes(items) {
+  dishesBox.innerHTML = '';
+
+  if (!items.length) {
+    dishesBox.innerHTML = `<div class="alert alert-info">Aucun plat</div>`;
+    return;
+  }
+
+  items.forEach(d => {
+    const div = document.createElement('div');
+    div.className = 'card p-3 mb-3';
+
+    div.innerHTML = `
+      <div class="d-flex justify-content-between align-items-start gap-3">
+        <div>
+          <strong>${d.name || 'Sans nom'}</strong>
+          <div class="text-muted small">${labelType(d.type)}</div>
+          <div class="small mt-2">${d.description || ''}</div>
+        </div>
+
+        <div class="text-end" style="min-width:160px;">
+          <button class="btn btn-sm btn-warning w-100 mb-2 js-edit-dish" data-id="${d.id}">
+            Modifier
+          </button>
+          <button class="btn btn-sm btn-danger w-100 js-delete-dish" data-id="${d.id}">
+            Supprimer
+          </button>
+        </div>
+      </div>
+    `;
+
+    dishesBox.appendChild(div);
+  });
+
+  dishesBox.querySelectorAll('.js-edit-dish').forEach(btn => {
+    btn.addEventListener('click', () => openDishModal(btn.dataset.id));
+  });
+
+  dishesBox.querySelectorAll('.js-delete-dish').forEach(btn => {
+    btn.addEventListener('click', () => deleteDish(btn.dataset.id));
+  });
+}
+
+function clearDishForm() {
+  in_dish_id.value = '';
+  in_dish_name.value = '';
+  in_dish_type.value = 'entree';
+  in_dish_description.value = '';
+}
+
+function openDishModal(id = null) {
+  if (!dishModal) return setAlert('danger', 'Modal plat introuvable (#dishModal)');
+
+  if (!id) {
+    document.getElementById('dishModalTitle').textContent = 'Ajouter un plat';
+    clearDishForm();
+    dishModal.show();
+    return;
+  }
+
+  const d = DISHES.find(x => String(x.id) === String(id));
+  if (!d) return setAlert('danger', 'Plat introuvable');
+
+  document.getElementById('dishModalTitle').textContent = 'Modifier un plat';
+  in_dish_id.value = d.id;
+  in_dish_name.value = d.name || '';
+  in_dish_type.value = (d.type || 'entree').toLowerCase();
+  in_dish_description.value = d.description || '';
+  dishModal.show();
+}
+
+btnAddDish?.addEventListener('click', () => openDishModal(null));
+
+dishForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const id = in_dish_id.value ? Number(in_dish_id.value) : null;
+  const payload = {
+    name: in_dish_name.value.trim(),
+    type: in_dish_type.value,
+    description: in_dish_description.value.trim()
+  };
+
+  if (!payload.name) return setAlert('danger', 'Nom obligatoire');
+
+  try {
+    const url = id
+      ? `http://localhost:9000/index.php?route=/api/dishes/${id}`
+      : `http://localhost:9000/index.php?route=/api/dishes`;
+
+    const method = id ? 'PUT' : 'POST';
+
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setAlert('danger', data.error || 'Erreur enregistrement plat');
+      return;
+    }
+
+    dishModal?.hide();
+    setAlert('success', id ? 'Plat modifié ✅' : 'Plat ajouté ✅');
+    loadDishes();
+  } catch (e) {
+    console.error(e);
+    setAlert('danger', 'Erreur réseau (plats)');
+  }
+});
+
+async function deleteDish(id) {
+  if (!confirm('Supprimer ce plat ?')) return;
+
+  try {
+    const res = await fetch(`http://localhost:9000/index.php?route=/api/dishes/${id}`, {
+      method: 'DELETE'
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setAlert('danger', data.error || 'Erreur suppression plat');
+      return;
+    }
+
+    setAlert('success', 'Plat supprimé ✅');
+    loadDishes();
+  } catch (e) {
+    console.error(e);
+    setAlert('danger', 'Erreur réseau (suppression plat)');
+  }
+}
 
 document.getElementById('btn-confirm-cancel')?.addEventListener('click', submitCancel);
 
@@ -506,6 +795,8 @@ document.getElementById('btn-confirm-cancel')?.addEventListener('click', submitC
 
   // Chargement initial
   loadOrders();
-
   loadMenus();
+  loadReviews();
+  loadHours();
+  loadDishes();
 })();

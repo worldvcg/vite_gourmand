@@ -16,6 +16,8 @@ require_once __DIR__ . '/../controllers/ContactController.php';
 require_once __DIR__ . '/../controllers/AuthController.php';
 require_once __DIR__ . '/../controllers/OrderController.php'; 
 require_once __DIR__ . '/../controllers/ReviewController.php';
+require_once __DIR__ . '/../controllers/DishController.php';
+require_once __DIR__ . '/../controllers/OpeningHoursController.php';
 
 // Lecture route
 $route = $_GET['route'] ?? '';
@@ -157,6 +159,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === '/api/reviews') {
 // MODERATE REVIEW
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && preg_match('#^/api/reviews/(\d+)/moderate$#', $route, $m)) {
     ReviewController::moderate((int)$m[1]);
+    exit;
+}
+
+// -----------------------
+// 🍽️ DISHES
+// -----------------------
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === '/api/dishes') {
+    DishController::list();
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === '/api/dishes') {
+    DishController::create();
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'PUT' && preg_match('#^/api/dishes/(\d+)$#', $route, $m)) {
+    DishController::update((int)$m[1]);
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'DELETE' && preg_match('#^/api/dishes/(\d+)$#', $route, $m)) {
+    DishController::delete((int)$m[1]);
+    exit;
+}
+
+// -----------------------
+// 🕒 OPENING HOURS
+// -----------------------
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === '/api/opening-hours') {
+    OpeningHoursController::list();
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'PUT' && preg_match('#^/api/opening-hours/(\d+)$#', $route, $m)) {
+    OpeningHoursController::update((int)$m[1]);
     exit;
 }
 
