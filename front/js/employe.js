@@ -203,5 +203,83 @@ console.log("✅ employe.js chargé");
     });
   }
 
+  const ordersBox = document.getElementById('orders-list');
+  const fEmail = document.getElementById('f-order-email');
+  const btnRefreshOrders = document.getElementById('btn-refresh-orders');
+
+  function euro(val) {
+    return Number(val || 0).toLocaleString('fr-FR', {
+      style: 'currency',
+      currency: 'EUR'
+    });
+  }
+
+  async function loadOrders() {
+    try {
+      const email = (fEmail?.value || '').trim();
+
+      const qs = new URLSearchParams();
+      if (email) qs.set('email', email);
+
+      const url = `http://localhost:9000/index.php?route=/api/orders${qs.toString() ? '&' + qs.toString() : ''}`;
+
+      const res = await fetch(url, { cache: 'no-store' });
+      const data = await res.json();
+
+      if (!res.ok) {
+        ordersBox.innerHTML = `<div class="alert alert-danger">Erreur chargement commandes</div>`;
+        return;
+      }
+
+      renderOrders(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error(e);
+      ordersBox.innerHTML = `<div class="alert alert-danger">Impossible de charger les commandes</div>`;
+    }
+  }
+
+  function renderOrders(items) {
+    ordersBox.innerHTML = '';
+
+    if (!items.length) {
+      ordersBox.innerHTML = `<div class="alert alert-info">Aucune commande</div>`;
+      return;
+    }
+
+    items.forEach(o => {
+      const div = document.createElement('div');
+      div.className = 'card p-3 mb-3';
+
+      div.innerHTML = `
+        <div class="d-flex justify-content-between">
+          <div>
+            <strong>Commande #${o.id}</strong><br>
+            <span class="text-muted small">${o.menu_title || 'Menu #' + o.menu_id}</span>
+          </div>
+          <div class="text-end">
+            <strong>${euro(o.total)}</strong><br>
+            <span class="small text-muted">${o.persons} pers.</span>
+          </div>
+        </div>
+
+        <hr class="my-2">
+
+        <div class="small">
+          <div><strong>Ville :</strong> ${o.city}</div>
+          <div><strong>Adresse :</strong> ${o.address}</div>
+          <div><strong>Date :</strong> ${o.date} à ${o.time}</div>
+        </div>
+      `;
+
+      ordersBox.appendChild(div);
+    });
+  }
+
+  btnRefreshOrders?.addEventListener('click', loadOrders);
+  fEmail?.addEventListener('input', loadOrders);
+
+  // Chargement initial
+  loadOrders();
+
   loadMenus();
 })();

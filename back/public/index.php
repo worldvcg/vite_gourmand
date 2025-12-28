@@ -119,6 +119,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === '/api/orders/my') {
     exit;
 }
 
+// LIST ALL ORDERS (employé / admin)
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === '/api/orders') {
+    OrderController::listAll();
+    exit;
+}
+
 // -----------------------
 // ❌ 404 SI AUCUNE ROUTE
 // -----------------------

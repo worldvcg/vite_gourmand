@@ -51,6 +51,40 @@
   <!-- LISTE MENUS -->
   <div id="menus-list"></div>
 
+    <hr class="my-5">
+
+  <!-- COMMANDES -->
+  <h2 class="mb-3">Commandes</h2>
+
+  <div class="row g-2 mb-3">
+    <div class="col-md-4">
+      <label class="form-label">Filtrer par statut</label>
+      <select id="f-order-status" class="form-select">
+        <option value="">Tous</option>
+        <option value="accepte">accepté</option>
+        <option value="en_preparation">en préparation</option>
+        <option value="en_livraison">en cours de livraison</option>
+        <option value="livre">livré</option>
+        <option value="attente_retour_materiel">en attente retour matériel</option>
+        <option value="terminee">terminée</option>
+        <option value="annulee">annulée</option>
+      </select>
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Filtrer par client (email)</label>
+      <input id="f-order-email" class="form-control" placeholder="ex: client@mail.fr">
+    </div>
+
+    <div class="col-md-4 d-flex align-items-end">
+      <button id="btn-refresh-orders" class="btn btn-primary w-100">
+        Rafraîchir
+      </button>
+    </div>
+  </div>
+
+  <div id="orders-list"></div>
+
 </main>
 
 <!-- MODAL MENU -->
