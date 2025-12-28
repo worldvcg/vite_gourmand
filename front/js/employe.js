@@ -204,6 +204,7 @@ console.log("✅ employe.js chargé");
   }
 
   const ordersBox = document.getElementById('orders-list');
+  const fStatus = document.getElementById('f-order-status');
   const fEmail = document.getElementById('f-order-email');
   const btnRefreshOrders = document.getElementById('btn-refresh-orders');
 
@@ -216,9 +217,11 @@ console.log("✅ employe.js chargé");
 
   async function loadOrders() {
     try {
+      const status = (fStatus?.value || '').trim();
       const email = (fEmail?.value || '').trim();
 
       const qs = new URLSearchParams();
+      if (status) qs.set('status', status);
       if (email) qs.set('email', email);
 
       const url = `http://localhost:9000/index.php?route=/api/orders${qs.toString() ? '&' + qs.toString() : ''}`;
@@ -257,17 +260,18 @@ console.log("✅ employe.js chargé");
             <span class="text-muted small">${o.menu_title || 'Menu #' + o.menu_id}</span>
           </div>
           <div class="text-end">
-            <strong>${euro(o.total)}</strong><br>
-            <span class="small text-muted">${o.persons} pers.</span>
+            <strong>${euro(o.total_price)}</strong><br>
+            <span class="small text-muted">${o.guests} pers.</span>
           </div>
         </div>
 
         <hr class="my-2">
 
         <div class="small">
-          <div><strong>Ville :</strong> ${o.city}</div>
-          <div><strong>Adresse :</strong> ${o.address}</div>
-          <div><strong>Date :</strong> ${o.date} à ${o.time}</div>
+          <div><strong>Client :</strong> ${o.fullname || ''} (${o.email || ''})</div>
+          <div><strong>Adresse :</strong> ${o.address || ''}</div>
+          <div><strong>Date :</strong> ${o.prestation_date || ''} à ${o.prestation_time || ''}</div>
+          <div><strong>Statut :</strong> ${o.status || ''}</div>
         </div>
       `;
 
@@ -277,6 +281,7 @@ console.log("✅ employe.js chargé");
 
   btnRefreshOrders?.addEventListener('click', loadOrders);
   fEmail?.addEventListener('input', loadOrders);
+  fStatus?.addEventListener('change', loadOrders);
 
   // Chargement initial
   loadOrders();

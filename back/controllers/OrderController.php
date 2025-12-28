@@ -163,61 +163,65 @@ class OrderController
   // ✅ Toutes les commandes (employé/admin) + filtres
   // Filtre: ?status=... (si tu ajoutes la colonne status plus tard)
   // Filtre: ?email=... (via users.email)
-  public static function listAll()
-  {
-    header('Content-Type: application/json; charset=utf-8');
+public static function listAll()
+{
+  header('Content-Type: application/json; charset=utf-8');
 
+  try {
     $pdo = pdo();
 
-    $status = trim($_GET['status'] ?? '');
-    $email  = trim($_GET['email'] ?? '');
+    $status = $_GET['status'] ?? ''; // pas utilisé tant que la colonne n'existe pas
+    $email  = $_GET['email'] ?? '';
 
-    // ⚠️ IMPORTANT :
-    // - Là on ne SELECT que des colonnes existantes (orders.*)
-    // - Email client vient de users.email
-    // - Menu title vient de menus.title
     $sql = "
-      SELECT
-        o.*,
-        u.email AS user_email,
-        u.first_name,
-        u.last_name,
-        m.title AS menu_title
-      FROM orders o
-      LEFT JOIN users u ON u.id = o.user_id
-      LEFT JOIN menus m ON m.id = o.menu_id
-      WHERE 1=1
-    ";
+  SELECT
+    o.id,
+    o.user_id,
+    o.menu_id,
+    o.fullname,
+    o.email,
+    o.phone,
+    o.address,
+    o.prestation_date,
+    o.prestation_time,
+    o.guests,
+    o.base_price,
+    o.delivery_cost,
+    o.total_price,
+    o.created_at,
+    o.status,
+    m.title AS menu_title
+  FROM orders o
+  LEFT JOIN menus m ON m.id = o.menu_id
+  WHERE 1=1
+";
 
     $params = [];
 
-    // ✅ Filtre email (existe via users)
     if ($email !== '') {
       $sql .= " AND u.email LIKE ?";
-      $params[] = "%{$email}%";
+      $params[] = "%$email%";
     }
 
-    // ✅ Filtre status seulement si la colonne existe
-    // (Si tu n’as pas encore "status" dans orders, laisse comme ça => ça ne filtrera pas)
-    if ($status !== '') {
-      $sql .= " AND o.status = ?";
-      $params[] = $status;
-    }
+    // ✅ À activer seulement quand tu ajoutes la colonne `status` dans orders
+    // if ($status !== '') {
+    //   $sql .= " AND o.status = ?";
+    //   $params[] = $status;
+    // }
 
     $sql .= " ORDER BY o.id DESC";
 
-    try {
-      $stmt = $pdo->prepare($sql);
-      $stmt->execute($params);
-      echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
-    } catch (Throwable $e) {
-      // Si tu n’as pas la colonne status => tu auras "Unknown column o.status"
-      // => tu peux soit ajouter la colonne dans la DB, soit enlever ce filtre.
-      http_response_code(500);
-      echo json_encode([
-        'error' => 'listAll failed',
-        'detail' => $e->getMessage()
-      ], JSON_UNESCAPED_UNICODE);
-    }
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
+
+  } catch (Throwable $e) {
+    http_response_code(500);
+    echo json_encode([
+      'error' => 'listAll failed',
+      'detail' => $e->getMessage()
+    ], JSON_UNESCAPED_UNICODE);
   }
 }
+} 
