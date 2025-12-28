@@ -372,4 +372,43 @@ footer {
   .bouton {
     width: 100%;
   }
+}
+/* =========================
+   BOUTONS AVIS À MODÉRER
+   ========================= */
+.review-actions {
+  min-width: 260px;
+}
+
+.review-actions .btn {
+  width: 100%;
+  padding: 6px 12px; /* 🔽 plus fin */
+  font-size: 0.9rem; /* 🔽 texte plus discret */
+  font-weight: 500;
+  border-radius: 6px; /* 🔽 plus élégant */
+}
+
+.review-actions textarea {
+  width: 100%;
+  font-size: 0.85rem;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+}
+
+/* =========================
+   AVIS À MODÉRER (EMPLOYÉ)
+   ========================= */
+.reviews-section {
+  max-width: 1100px; /* même largeur que Commandes */
+  margin: 0 auto;
+}
+
+.reviews-list .card {
+  border-radius: 12px;
+}
+
+@media (max-width: 768px) {
+  .reviews-section {
+    padding: 0 10px;
+  }
 }/*# sourceMappingURL=css.css.map */

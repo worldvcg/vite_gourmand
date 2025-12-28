@@ -385,6 +385,119 @@ async function submitCancel() {
   }
 }
 
+// =====================
+// REVIEWS (MODERATION)
+// =====================
+const reviewsBox = document.getElementById('reviews-list');
+const fReviewStatus = document.getElementById('f-review-status');
+const btnRefreshReviews = document.getElementById('btn-refresh-reviews');
+
+async function loadReviews() {
+  try {
+    const status = (fReviewStatus?.value || '').trim();
+    const qs = new URLSearchParams();
+    if (status) qs.set('status', status);
+
+    const url = `http://localhost:9000/index.php?route=/api/reviews${qs.toString() ? '&' + qs.toString() : ''}`;
+
+    const res = await fetch(url, { cache: 'no-store' });
+    const data = await res.json();
+
+    if (!res.ok) {
+      reviewsBox.innerHTML = `<div class="alert alert-danger">Erreur chargement avis</div>`;
+      return;
+    }
+
+    renderReviews(Array.isArray(data) ? data : []);
+  } catch (e) {
+    console.error(e);
+    reviewsBox.innerHTML = `<div class="alert alert-danger">Impossible de charger les avis</div>`;
+  }
+}
+
+function renderReviews(items) {
+  reviewsBox.innerHTML = '';
+
+  if (!items.length) {
+    reviewsBox.inners = `<div class="alert alert-info">Aucun avis</div>`;
+    reviewsBox.innerHTML = `<div class="alert alert-info">Aucun avis</div>`;
+    return;
+  }
+
+  items.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'card p-3 mb-3';
+
+    div.innerHTML = `
+      <div class="d-flex justify-content-between align-items-start gap-3">
+        <div>
+          <strong>${r.menu_title || 'Menu'}</strong>
+          <div class="small text-muted">${r.user_email || ''} — ${r.created_at || ''}</div>
+          <div class="mt-2">
+            <div><strong>Note :</strong> ${r.rating}/5</div>
+            <div><strong>Commentaire :</strong> ${r.comment || ''}</div>
+            <div class="mt-1"><strong>Statut :</strong> ${r.status}</div>
+          </div>
+        </div>
+
+        <div class="text-end review-actions">
+          <textarea class="form-control form-control-sm mb-2 js-reason" data-id="${r.id}"
+            placeholder="Motif (obligatoire si refus)"></textarea>
+
+          <button class="btn btn-sm btn-primary w-100 mb-2 js-approve" data-id="${r.id}">
+            Valider
+          </button>
+          <button class="btn btn-sm btn-danger w-100 js-reject" data-id="${r.id}">
+            Refuser
+          </button>
+        </div>
+      </div>
+    `;
+
+    reviewsBox.appendChild(div);
+  });
+
+  reviewsBox.querySelectorAll('.js-approve').forEach(btn => {
+    btn.addEventListener('click', () => moderateReview(btn.dataset.id, 'approved'));
+  });
+
+  reviewsBox.querySelectorAll('.js-reject').forEach(btn => {
+    btn.addEventListener('click', () => moderateReview(btn.dataset.id, 'rejected'));
+  });
+}
+
+async function moderateReview(id, status) {
+  const reason = (reviewsBox.querySelector(`.js-reason[data-id="${id}"]`)?.value || '').trim();
+
+  if (status === 'rejected' && reason.length < 5) {
+    setAlert('danger', 'Motif obligatoire (min 5 caractères) pour refuser');
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:9000/index.php?route=/api/reviews/${id}/moderate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status, moderation_reason: reason })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setAlert('danger', data.error || 'Erreur modération');
+      return;
+    }
+
+    setAlert('success', status === 'approved' ? 'Avis validé ✅' : 'Avis refusé ✅');
+    loadReviews();
+  } catch (e) {
+    console.error(e);
+    setAlert('danger', 'Erreur réseau (modération)');
+  }
+}
+
+btnRefreshReviews?.addEventListener('click', loadReviews);
+fReviewStatus?.addEventListener('change', loadReviews);
+
 document.getElementById('btn-confirm-cancel')?.addEventListener('click', submitCancel);
 
   btnRefreshOrders?.addEventListener('click', loadOrders);

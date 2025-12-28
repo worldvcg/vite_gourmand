@@ -14,7 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 require_once __DIR__ . '/../controllers/MenuController.php';
 require_once __DIR__ . '/../controllers/ContactController.php';
 require_once __DIR__ . '/../controllers/AuthController.php';
-require_once __DIR__ . '/../controllers/OrderController.php'; // si présent
+require_once __DIR__ . '/../controllers/OrderController.php'; 
+require_once __DIR__ . '/../controllers/ReviewController.php';
 
 // Lecture route
 $route = $_GET['route'] ?? '';
@@ -140,6 +141,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && preg_match('#^/api/orders/(\d+)/can
 // GET /api/orders/{id}/status (suivi client)
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && preg_match('#^/api/orders/(\d+)/status$#', $route, $m)) {
     OrderController::getStatus((int)$m[1]);
+    exit;
+}
+
+// -----------------------
+// ⭐ AVIS / REVIEWS
+// -----------------------
+
+// LIST REVIEWS (employé/admin)
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === '/api/reviews') {
+    ReviewController::list();
+    exit;
+}
+
+// MODERATE REVIEW
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && preg_match('#^/api/reviews/(\d+)/moderate$#', $route, $m)) {
+    ReviewController::moderate((int)$m[1]);
     exit;
 }
 

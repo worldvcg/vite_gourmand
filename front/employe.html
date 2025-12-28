@@ -187,6 +187,30 @@
   </div>
 </div>
 
+<section class="reviews-section mt-5">
+  <h2 class="mb-3">Avis à modérer</h2>
+
+  <div class="row g-2 mb-3">
+    <div class="col-md-4">
+      <label class="form-label">Filtrer</label>
+      <select id="f-review-status" class="form-select">
+        <option value="">Tous</option>
+        <option value="pending">En attente</option>
+        <option value="approved">Validés</option>
+        <option value="rejected">Refusés</option>
+      </select>
+    </div>
+
+    <div class="col-md-4 d-flex align-items-end">
+      <button id="btn-refresh-reviews" class="btn btn-primary w-100">
+        Rafraîchir
+      </button>
+    </div>
+  </div>
+
+  <div id="reviews-list" class="reviews-list"></div>
+</section>
+
 <!-- PROTECTION ROLE -->
 <script>
   const raw = localStorage.getItem("user");
