@@ -125,6 +125,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === '/api/orders') {
     exit;
 }
 
+// UPDATE ORDER STATUS (employé/admin)
+if ($_SERVER['REQUEST_METHOD'] === 'PUT' && preg_match('#^/api/orders/(\d+)/status$#', $route, $m)) {
+    OrderController::updateStatus((int)$m[1]);
+    exit;
+}
+
+// CANCEL ORDER (employé/admin) : POST /api/orders/{id}/cancel
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && preg_match('#^/api/orders/(\d+)/cancel$#', $route, $m)) {
+    OrderController::cancel((int)$m[1]);
+    exit;
+}
+
+// GET /api/orders/{id}/status (suivi client)
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && preg_match('#^/api/orders/(\d+)/status$#', $route, $m)) {
+    OrderController::getStatus((int)$m[1]);
+    exit;
+}
+
 // -----------------------
 // ❌ 404 SI AUCUNE ROUTE
 // -----------------------

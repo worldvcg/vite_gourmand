@@ -242,42 +242,150 @@ console.log("✅ employe.js chargé");
   }
 
   function renderOrders(items) {
-    ordersBox.innerHTML = '';
+  ordersBox.innerHTML = '';
 
-    if (!items.length) {
-      ordersBox.innerHTML = `<div class="alert alert-info">Aucune commande</div>`;
+  if (!items.length) {
+    ordersBox.innerHTML = `<div class="alert alert-info">Aucune commande</div>`;
+    return;
+  }
+
+  items.forEach(o => {
+    const div = document.createElement('div');
+    div.className = 'card p-3 mb-3';
+
+    const currentStatus = o.status || 'accepte';
+
+    div.innerHTML = `
+      <div class="d-flex justify-content-between align-items-start gap-3">
+        <div>
+          <strong>Commande #${o.id}</strong><br>
+          <span class="text-muted small">${o.menu_title || 'Menu #' + o.menu_id}</span>
+          <div class="small mt-2">
+            <div><strong>Client :</strong> ${o.fullname || ''} (${o.email || ''})</div>
+            <div><strong>Tél :</strong> ${o.phone || ''}</div>
+            <div><strong>Adresse :</strong> ${o.address || ''}</div>
+            <div><strong>Date :</strong> ${o.prestation_date || ''} à ${o.prestation_time || ''}</div>
+          </div>
+        </div>
+
+        <div class="text-end">
+          <div><strong>${euro(o.total_price)}</strong></div>
+          <div class="small text-muted">${o.guests} pers.</div>
+
+          <div class="mt-2">
+            <label class="form-label small mb-1">Statut</label>
+            <select class="form-select form-select-sm js-status" data-id="${o.id}">
+              <option value="accepte" ${currentStatus === 'accepte' ? 'selected' : ''}>accepté</option>
+              <option value="en_preparation" ${currentStatus === 'en_preparation' ? 'selected' : ''}>en préparation</option>
+              <option value="en_livraison" ${currentStatus === 'en_livraison' ? 'selected' : ''}>en cours de livraison</option>
+              <option value="livre" ${currentStatus === 'livre' ? 'selected' : ''}>livré</option>
+              <option value="attente_retour_materiel" ${currentStatus === 'attente_retour_materiel' ? 'selected' : ''}>attente retour matériel</option>
+              <option value="terminee" ${currentStatus === 'terminee' ? 'selected' : ''}>terminée</option>
+              <option value="annulee" ${currentStatus === 'annulee' ? 'selected' : ''}>annulée</option>
+            </select>
+
+            <button class="btn btn-sm btn-primary w-100 mt-2 js-save-status" data-id="${o.id}">
+              Mettre à jour
+            </button>
+
+            <button class="btn btn-sm btn-danger w-100 mt-2 js-cancel"
+              data-id="${o.id}"
+              ${currentStatus === 'annulee' || currentStatus === 'terminee' ? 'disabled' : ''}>
+              Annuler (motif obligatoire)
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    ordersBox.appendChild(div);
+  });
+
+  // événements après rendu
+  ordersBox.querySelectorAll('.js-save-status').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      const select = ordersBox.querySelector(`.js-status[data-id="${id}"]`);
+      const status = select.value;
+      await updateOrderStatus(id, status);
+    });
+  });
+
+  ordersBox.querySelectorAll('.js-cancel').forEach(btn => {
+    btn.addEventListener('click', () => openCancelModal(btn.dataset.id));
+  });
+}
+
+async function updateOrderStatus(id, status) {
+  try {
+    const res = await fetch(`http://localhost:9000/index.php?route=/api/orders/${id}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setAlert('danger', data.error || 'Erreur mise à jour statut');
       return;
     }
 
-    items.forEach(o => {
-      const div = document.createElement('div');
-      div.className = 'card p-3 mb-3';
-
-      div.innerHTML = `
-        <div class="d-flex justify-content-between">
-          <div>
-            <strong>Commande #${o.id}</strong><br>
-            <span class="text-muted small">${o.menu_title || 'Menu #' + o.menu_id}</span>
-          </div>
-          <div class="text-end">
-            <strong>${euro(o.total_price)}</strong><br>
-            <span class="small text-muted">${o.guests} pers.</span>
-          </div>
-        </div>
-
-        <hr class="my-2">
-
-        <div class="small">
-          <div><strong>Client :</strong> ${o.fullname || ''} (${o.email || ''})</div>
-          <div><strong>Adresse :</strong> ${o.address || ''}</div>
-          <div><strong>Date :</strong> ${o.prestation_date || ''} à ${o.prestation_time || ''}</div>
-          <div><strong>Statut :</strong> ${o.status || ''}</div>
-        </div>
-      `;
-
-      ordersBox.appendChild(div);
-    });
+    setAlert('success', `Statut de la commande #${id} mis à jour`);
+    loadOrders();
+  } catch (e) {
+    console.error(e);
+    setAlert('danger', 'Erreur réseau (update status)');
   }
+}
+
+// ===== MODAL ANNULATION =====
+const cancelModalEl = document.getElementById('cancelModal');
+const cancelModal = cancelModalEl ? new bootstrap.Modal(cancelModalEl) : null;
+
+function openCancelModal(orderId) {
+  if (!cancelModal) {
+    setAlert('danger', 'Modal annulation introuvable (#cancelModal)');
+    return;
+  }
+  document.getElementById('cancel-order-id').value = orderId;
+  document.getElementById('cancel-reason').value = '';
+  document.getElementById('cancel-contact').value = 'gsm';
+  cancelModal.show();
+}
+
+async function submitCancel() {
+  const id = document.getElementById('cancel-order-id').value;
+  const cancel_reason = document.getElementById('cancel-reason').value.trim();
+  const cancel_contact_mode = document.getElementById('cancel-contact').value;
+
+  if (cancel_reason.length < 5) {
+    setAlert('danger', 'Motif trop court (min 5 caractères)');
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:9000/index.php?route=/api/orders/${id}/cancel`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cancel_reason, cancel_contact_mode })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setAlert('danger', data.error || 'Erreur annulation');
+      return;
+    }
+
+    cancelModal.hide();
+    setAlert('success', `Commande #${id} annulée`);
+    loadOrders();
+  } catch (e) {
+    console.error(e);
+    setAlert('danger', 'Erreur réseau (annulation)');
+  }
+}
+
+document.getElementById('btn-confirm-cancel')?.addEventListener('click', submitCancel);
 
   btnRefreshOrders?.addEventListener('click', loadOrders);
   fEmail?.addEventListener('input', loadOrders);

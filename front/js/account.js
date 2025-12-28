@@ -156,25 +156,36 @@ if (!localStorage.getItem('authToken')) {
   }
 
   async function showTracking(id) {
-    const token = localStorage.getItem('authToken');
-    try {
-      const res = await fetch(API + `/api/orders/${id}/tracking`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await res.json();
-      const zone = document.querySelector('.suivi-commande');
-      zone.style.display = 'block';
-      zone.innerHTML = `
-        <h2>Suivi de la commande</h2>
-        <ul>
-          ${data.map(step => `<li>${step.status} – ${step.date}</li>`).join('')}
-        </ul>
-      `;
-    } catch (err) {
-      console.error(err);
-      setAlert('danger', 'Impossible de récupérer le suivi');
+  const token = localStorage.getItem('authToken');
+
+  try {
+    // ✅ route correcte: /status (pas /tracking)
+    const res = await fetch(API + `/api/orders/${id}/status`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      setAlert('danger', data.error || 'Impossible de récupérer le suivi');
+      return;
     }
+
+    const zone = document.querySelector('.suivi-commande');
+    zone.style.display = 'block';
+
+    // ✅ data est un OBJET (id, status, prestation_date, prestation_time)
+    zone.innerHTML = `
+      <h2>Suivi de la commande</h2>
+      <p><strong>Commande :</strong> #${data.id}</p>
+      <p><strong>Statut :</strong> ${data.status || '—'}</p>
+      <p><strong>Prestation :</strong> ${data.prestation_date || '—'} à ${data.prestation_time || '—'}</p>
+    `;
+  } catch (err) {
+    console.error(err);
+    setAlert('danger', 'Impossible de récupérer le suivi');
   }
+}
 
   function showReviewForm(id) {
     const zone = document.querySelector('.donner-avis');

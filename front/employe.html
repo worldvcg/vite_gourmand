@@ -53,11 +53,6 @@
 
   <hr class="my-5">
 
-  <!-- LISTE MENUS -->
-  <div id="menus-list"></div>
-
-  <hr class="my-5">
-
   <!-- COMMANDES -->
   <h2 class="mb-3">Commandes</h2>
 
@@ -153,6 +148,45 @@
   </div>
 </div>
 
+<!-- MODAL ANNULATION COMMANDE -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Annuler une commande</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="cancel-order-id">
+
+        <div class="mb-3">
+          <label class="form-label">Mode de contact</label>
+          <select id="cancel-contact" class="form-select">
+            <option value="gsm">GSM (appel)</option>
+            <option value="mail">Mail</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Motif d’annulation</label>
+          <textarea id="cancel-reason" class="form-control" rows="3"
+            placeholder="Explique le motif (min 5 caractères)"></textarea>
+        </div>
+
+        <div class="alert alert-danger d-none" id="cancel-error"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+        <button class="btn btn-danger" id="btn-confirm-cancel">Confirmer l’annulation</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <!-- PROTECTION ROLE -->
 <script>
   const raw = localStorage.getItem("user");
@@ -164,7 +198,7 @@
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="./js/employe.js?v=5" defer></script>
+<script src="./js/employe.js?v=5"></script>
 <script src="./js/nav-auth.js"></script>
 </body>
 </html>

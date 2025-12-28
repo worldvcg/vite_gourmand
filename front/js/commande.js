@@ -156,14 +156,15 @@
     ) || 0;
 
     const payload = {
-      menu_id: Number(menuId),
-      persons,
-      address: address.value.trim(),
-      city: city.value.trim(),
-      date: date.value,
-      time: time.value,
-      total
-      // place: place.value.trim() // ton backend ne le prend pas, donc je le laisse commenté
+     menu_id: Number(menuId),
+    fullname: `${first.value.trim()} ${last.value.trim()}`.trim(),
+    email: email.value.trim(),
+    phone: phone.value.trim(),
+    address: address.value.trim(),
+    city: city.value.trim(), // optionnel
+    prestation_date: date.value,
+    prestation_time: time.value,
+    guests: persons
     };
 
     const res = await fetch(API + '/api/orders', {
