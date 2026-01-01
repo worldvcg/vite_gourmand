@@ -1,9 +1,10 @@
+Options -MultiViews
 RewriteEngine On
 
-# Si le fichier existe → on le sert normalement
+# Laisser passer les vrais fichiers/dossiers
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# Sinon → tout passe vers index.php
+# Sinon tout vers index.php
 RewriteRule ^ index.php [QSA,L]

@@ -1,5 +1,9 @@
 console.log("✅ employe.js chargé");
 (() => {
+  if (!document.getElementById("menus-list")) {
+  console.log("⏭️ employe.js ignoré (pas la page gestion)");
+  return;
+}
   const API_PROXY = './admin/menu_proxy.php';
   const alertBox = document.getElementById('alert-box');
   const menusBox = document.getElementById('menus-list');

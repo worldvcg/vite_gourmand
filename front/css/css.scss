@@ -48,19 +48,37 @@ body {
   background: var(--white);
 }
 
+/* =========================
+   REMPLACER LE BLEU BOOTSTRAP
+   ========================= */
 
-/* ============================
-  BUTTONS
-============================ */
+/* Boutons primary */
 .btn-primary {
   background-color: var(--vg-primary) !important;
   border-color: var(--vg-primary) !important;
+}
 
-  --bs-btn-bg: var(--vg-primary);
-  --bs-btn-border-color: var(--vg-primary);
-  --bs-btn-hover-bg: var(--vg-primary-hover);
-  --bs-btn-hover-border-color: var(--vg-primary-hover);
-  --bs-btn-hover-color: #fff;
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--vg-primary-hover) !important;
+  border-color: var(--vg-primary-hover) !important;
+}
+
+/* Nav pills (Employés / Statistiques) */
+.nav-pills .nav-link {
+  color: var(--vg-primary);
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.nav-pills .nav-link.active {
+  background-color: var(--vg-primary) !important;
+  color: #fff !important;
+}
+
+/* Icônes dans les onglets */
+.nav-pills .nav-link i {
+  color: inherit;
 }
 
 .btn-outline-primary {

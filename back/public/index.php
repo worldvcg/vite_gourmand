@@ -18,6 +18,8 @@ require_once __DIR__ . '/../controllers/OrderController.php';
 require_once __DIR__ . '/../controllers/ReviewController.php';
 require_once __DIR__ . '/../controllers/DishController.php';
 require_once __DIR__ . '/../controllers/OpeningHoursController.php';
+require_once __DIR__ . '/../controllers/AdminController.php';
+require_once __DIR__ . '/../controllers/StatsController.php';
 
 // Lecture route
 $route = $_GET['route'] ?? '';
@@ -195,6 +197,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === '/api/opening-hours') {
 
 if ($_SERVER['REQUEST_METHOD'] === 'PUT' && preg_match('#^/api/opening-hours/(\d+)$#', $route, $m)) {
     OpeningHoursController::update((int)$m[1]);
+    exit;
+}
+
+// -----------------------
+// 🛠️ ADMIN (Employés)
+// -----------------------
+
+// LIST EMPLOYEES
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === '/api/admin/employees') {
+    AdminController::listEmployees();
+    exit;
+}
+
+// CREATE EMPLOYEE
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === '/api/admin/employees') {
+    AdminController::createEmployee();
+    exit;
+}
+
+// TOGGLE ACTIVE (enable/disable)
+if ($_SERVER['REQUEST_METHOD'] === 'PUT' && preg_match('#^/api/admin/employees/(\d+)/active$#', $route, $m)) {
+    AdminController::setEmployeeActive((int)$m[1]);
+    exit;
+}
+
+// -----------------------
+// 📊 ADMIN STATS
+// -----------------------
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === '/api/admin/stats/orders-per-menu') {
+    StatsController::ordersPerMenu();
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === '/api/admin/stats/revenue-per-menu') {
+    StatsController::revenuePerMenu();
     exit;
 }
 
