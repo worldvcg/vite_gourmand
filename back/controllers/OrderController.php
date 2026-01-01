@@ -40,13 +40,13 @@ class OrderController
 
       // Lire le JSON
       $data = json_decode(file_get_contents('php://input'), true);
-      if (!$data) {
+      if (!$data || !is_array($data)) {
         http_response_code(400);
         echo json_encode(['error' => 'Données manquantes'], JSON_UNESCAPED_UNICODE);
         return;
       }
 
-      // Champs requis (table orders)
+      // Champs requis
       $required = ['menu_id', 'fullname', 'email', 'phone', 'address', 'prestation_date', 'prestation_time', 'guests'];
       foreach ($required as $field) {
         if (!isset($data[$field]) || trim((string)$data[$field]) === '') {
@@ -60,7 +60,7 @@ class OrderController
       $guests = (int)$data['guests'];
 
       // Charger menu (min_people/base_price)
-      $stmt = $pdo->prepare("SELECT id, min_people, base_price FROM menus WHERE id = ? LIMIT 1");
+      $stmt = $pdo->prepare("SELECT id, min_people, base_price, title FROM menus WHERE id = ? LIMIT 1");
       $stmt->execute([$menuId]);
       $menu = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -96,7 +96,10 @@ class OrderController
 
       $totalPrice = $basePrice + $deliveryCost;
 
-      // Insert
+      // ✅ Transaction : SQL + NoSQL ensemble
+      $pdo->beginTransaction();
+
+      // Insert SQL
       $stmt = $pdo->prepare("
         INSERT INTO orders
           (user_id, menu_id, fullname, email, phone, address, prestation_date, prestation_time, guests,
@@ -121,19 +124,43 @@ class OrderController
         'accepte'
       ]);
 
+      $orderId = (int)$pdo->lastInsertId();
+
+      // Append NoSQL (orders.json)
+      self::appendNoSqlOrder([
+        'order_id'   => $orderId,
+        'user_id'    => $userId,
+        'menu_id'    => $menuId,
+        'menu_label' => (string)($menu['title'] ?? ("Menu #".$menuId)),
+        'total'      => round((float)$totalPrice, 2),
+        'status'     => 'accepte',
+        'created_at' => date('Y-m-d')
+      ]);
+
+      $pdo->commit();
+
       echo json_encode([
         'success' => true,
         'message' => 'Commande enregistrée',
-        'order_id' => (int)$pdo->lastInsertId(),
-        'total_price' => $totalPrice
+        'order_id' => $orderId,
+        'total_price' => round((float)$totalPrice, 2)
       ], JSON_UNESCAPED_UNICODE);
+      return;
 
     } catch (Throwable $e) {
+      // rollback si transaction ouverte
+      try {
+        if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
+          $pdo->rollBack();
+        }
+      } catch (Throwable $ignored) {}
+
       http_response_code(500);
       echo json_encode([
         'error' => 'create failed',
         'detail' => $e->getMessage()
       ], JSON_UNESCAPED_UNICODE);
+      return;
     }
   }
 
@@ -226,7 +253,6 @@ class OrderController
   }
 
   // ✅ Annulation (employé/admin) : POST /api/orders/{id}/cancel
-  // Body JSON: { "cancel_reason": "...", "cancel_contact_mode": "gsm"|"mail" }
   public static function cancel(int $orderId)
   {
     header('Content-Type: application/json; charset=utf-8');
@@ -235,7 +261,7 @@ class OrderController
       $pdo = pdo();
 
       $data = json_decode(file_get_contents('php://input'), true);
-      if (!$data) {
+      if (!$data || !is_array($data)) {
         http_response_code(400);
         echo json_encode(['error' => 'Payload manquant'], JSON_UNESCAPED_UNICODE);
         return;
@@ -296,7 +322,6 @@ class OrderController
   }
 
   // ✅ Update statut (employé/admin) : PUT /api/orders/{id}/status
-  // Body JSON: { "status": "accepte|en_preparation|en_livraison|livre|attente_retour_materiel|terminee|annulee" }
   public static function updateStatus(int $orderId)
   {
     header('Content-Type: application/json; charset=utf-8');
@@ -335,7 +360,6 @@ class OrderController
   }
 
   // ✅ Liste des commandes (employé/admin) + filtres
-  // GET /api/orders?status=...&email=...
   public static function listAll()
   {
     header('Content-Type: application/json; charset=utf-8');
@@ -400,4 +424,46 @@ class OrderController
       ], JSON_UNESCAPED_UNICODE);
     }
   }
+
+  // -----------------------
+  // NoSQL helpers (JSON file)
+  // -----------------------
+  private static function appendNoSqlOrder(array $doc): void
+{
+  $dir  = __DIR__ . '/../nosql';
+  $file = $dir . '/orders.json';
+  $trace = $dir . '/trace.txt';
+
+  // 1) Créer dossier
+  if (!is_dir($dir)) {
+    if (!mkdir($dir, 0777, true) && !is_dir($dir)) {
+      throw new Exception("Impossible de créer le dossier: $dir");
+    }
+  }
+
+  // 2) Créer fichier s'il n'existe pas
+  if (!file_exists($file)) {
+    file_put_contents($file, "[]", LOCK_EX);
+  }
+
+  // Trace (pour vérifier que la fonction est appelée)
+  file_put_contents($trace, "append called => $file\n", FILE_APPEND);
+
+  // 3) Lire existant
+  $raw = file_get_contents($file);
+  if ($raw === false || trim($raw) === '') $raw = "[]";
+  $data = json_decode($raw, true);
+  if (!is_array($data)) $data = [];
+
+  // 4) Ajouter doc
+  $data[] = $doc;
+
+  // 5) Écrire avec verrou
+  $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+  $ok = file_put_contents($file, $json, LOCK_EX);
+
+  if ($ok === false) {
+    throw new Exception("Impossible d'écrire dans $file (permissions ?)");
+  }
+ }
 }

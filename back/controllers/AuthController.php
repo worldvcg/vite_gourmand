@@ -38,14 +38,21 @@ class AuthController {
         }
 
         $pdo = pdo();
-        $stmt = $pdo->prepare("SELECT id, email, password_hash, first_name, last_name, role FROM users WHERE email = ?");
+        $stmt = $pdo->prepare("SELECT id, email, password_hash, first_name, last_name, role, is_active FROM users WHERE email = ?");
         $stmt->execute([$data['email']]);
         $user = $stmt->fetch();
 
         if (!$user || !password_verify($data['password'], $user['password_hash'])) {
-            http_response_code(401);
-            echo json_encode(['error' => 'Identifiants invalides']);
-            return;
+             http_response_code(401);
+             echo json_encode(['error' => 'Identifiants invalides']);
+             return;
+        }
+
+        // ✅ Compte désactivé (après avoir vérifié que $user existe)
+        if ((int)($user['is_active'] ?? 1) === 0) {
+           http_response_code(403);
+           echo json_encode(['error' => 'Compte désactivé']);
+           return;
         }
 
         $token = bin2hex(random_bytes(32));
