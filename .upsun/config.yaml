@@ -1,0 +1,35 @@
+applications:
+  vite-gourmand:
+    type: "php:8.2"
+    disk: 1024
+
+    relationships:
+      database: "db:mysql"
+
+    web:
+      locations:
+        "/":
+          root: "front"
+          index:
+            - "index.html"
+          allow: true
+
+        "/index.php":
+          root: "back/public"
+          passthru: "/index.php"
+          allow: true
+
+        "/api":
+          root: "back/public"
+          passthru: "/index.php"
+          allow: true
+
+services:
+  db:
+    type: mysql:8.0
+    disk: 2048
+
+routes:
+  "https://{default}/":
+    type: upstream
+    upstream: "vite-gourmand:http"
