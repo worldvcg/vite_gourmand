@@ -65,6 +65,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === '/api/auth/logout') {
     exit;
 }
 
+// UPDATE ME (profil)
+if ($_SERVER['REQUEST_METHOD'] === 'PUT' && $route === '/api/users/me') {
+    require_once __DIR__ . '/../controllers/UserController.php';
+    UserController::updateMe();
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'PUT' && preg_match('#^/api/orders/(\d+)$#', $route, $m)) {
+    OrderController::update((int)$m[1]);
+    exit;
+}
+
+// UPDATE ME
+if ($_SERVER['REQUEST_METHOD'] === 'PUT' && $route === '/api/auth/me') {
+    AuthController::updateMe();
+    exit;
+}
+
+// FORGOT PASSWORD
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === '/api/auth/forgot-password') {
+    AuthController::forgotPassword();
+    exit;
+}
+
+// RESET PASSWORD
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === '/api/auth/reset-password') {
+    AuthController::resetPassword();
+    exit;
+}
 
 // -----------------------
 // ☎️ CONTACT
@@ -156,6 +185,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && preg_match('#^/api/orders/(\d+)/stat
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === '/api/reviews') {
     ReviewController::list();
     exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === '/api/reviews') {
+  ReviewController::create();
+  exit;
 }
 
 // MODERATE REVIEW

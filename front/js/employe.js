@@ -1,5 +1,16 @@
 console.log("✅ employe.js chargé");
 (() => {
+
+  const API = "http://localhost:9000/index.php?route=";
+  const token = (localStorage.getItem("authToken") || "").trim();
+
+  function authHeaders(extra = {}) {
+    return {
+      ...extra,
+      Authorization: "Bearer " + token
+    };
+  }
+
   if (!document.getElementById("menus-list")) {
   console.log("⏭️ employe.js ignoré (pas la page gestion)");
   return;
@@ -228,9 +239,9 @@ console.log("✅ employe.js chargé");
       if (status) qs.set('status', status);
       if (email) qs.set('email', email);
 
-      const url = `http://localhost:9000/index.php?route=/api/orders${qs.toString() ? '&' + qs.toString() : ''}`;
+      const url = `${API}/api/orders${qs.toString() ? "&" + qs.toString() : ""}`;
 
-      const res = await fetch(url, { cache: 'no-store' });
+      const res = await fetch(url, { cache: "no-store", headers: authHeaders() });
       const data = await res.json();
 
       if (!res.ok) {
@@ -279,6 +290,7 @@ console.log("✅ employe.js chargé");
           <div class="mt-2">
             <label class="form-label small mb-1">Statut</label>
             <select class="form-select form-select-sm js-status" data-id="${o.id}">
+              <option value="attente" ${currentStatus === 'attente' ? 'selected' : ''}>attente</option>
               <option value="accepte" ${currentStatus === 'accepte' ? 'selected' : ''}>accepté</option>
               <option value="en_preparation" ${currentStatus === 'en_preparation' ? 'selected' : ''}>en préparation</option>
               <option value="en_livraison" ${currentStatus === 'en_livraison' ? 'selected' : ''}>en cours de livraison</option>
@@ -322,23 +334,23 @@ console.log("✅ employe.js chargé");
 
 async function updateOrderStatus(id, status) {
   try {
-    const res = await fetch(`http://localhost:9000/index.php?route=/api/orders/${id}/status`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+    const res = await fetch(`${API}/api/orders/${id}/status`, {
+      method: "PUT",
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ status })
     });
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      setAlert('danger', data.error || 'Erreur mise à jour statut');
+      setAlert("danger", data.error || "Erreur mise à jour statut");
       return;
     }
 
-    setAlert('success', `Statut de la commande #${id} mis à jour`);
+    setAlert("success", `Statut de la commande #${id} mis à jour ✅`);
     loadOrders();
   } catch (e) {
     console.error(e);
-    setAlert('danger', 'Erreur réseau (update status)');
+    setAlert("danger", "Erreur réseau (update status)");
   }
 }
 
@@ -368,11 +380,11 @@ async function submitCancel() {
   }
 
   try {
-    const res = await fetch(`http://localhost:9000/index.php?route=/api/orders/${id}/cancel`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cancel_reason, cancel_contact_mode })
-    });
+    const res = await fetch(`${API}/api/orders/${id}/cancel`, {
+    method: "POST",
+    headers: authHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify({ cancel_reason, cancel_contact_mode })
+  });
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {

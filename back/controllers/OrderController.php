@@ -4,7 +4,34 @@ require_once __DIR__ . '/AuthController.php';
 
 class OrderController
 {
-  // ✅ Création commande (client connecté)
+  // ==========================
+  // Helpers historique
+  // ==========================
+  private static function pushStatusHistory(PDO $pdo, int $orderId, string $status, ?string $note = null): void
+  {
+    $stmt = $pdo->prepare("
+      INSERT INTO order_status_history (order_id, status, note)
+      VALUES (?, ?, ?)
+    ");
+    $stmt->execute([$orderId, $status, $note]);
+  }
+
+  private static function getHistory(PDO $pdo, int $orderId): array
+  {
+    $stmt = $pdo->prepare("
+      SELECT status, changed_at, note
+      FROM order_status_history
+      WHERE order_id = ?
+      ORDER BY changed_at ASC, id ASC
+    ");
+    $stmt->execute([$orderId]);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return is_array($rows) ? $rows : [];
+  }
+
+  // ==========================
+  // ✅ Création commande
+  // ==========================
   public static function create()
   {
     header('Content-Type: application/json; charset=utf-8');
@@ -47,7 +74,10 @@ class OrderController
       }
 
       // Champs requis
-      $required = ['menu_id', 'fullname', 'email', 'phone', 'address', 'prestation_date', 'prestation_time', 'guests'];
+      $required = [
+        'menu_id', 'fullname', 'email', 'phone', 'address',
+        'prestation_date', 'prestation_time', 'guests'
+      ];
       foreach ($required as $field) {
         if (!isset($data[$field]) || trim((string)$data[$field]) === '') {
           http_response_code(400);
@@ -59,14 +89,27 @@ class OrderController
       $menuId = (int)$data['menu_id'];
       $guests = (int)$data['guests'];
 
-      // Charger menu (min_people/base_price)
-      $stmt = $pdo->prepare("SELECT id, min_people, base_price, title FROM menus WHERE id = ? LIMIT 1");
+      // Charger menu (avec stock_available)
+      $stmt = $pdo->prepare("
+        SELECT id, title, min_people, base_price, stock_available
+        FROM menus
+        WHERE id = ?
+        LIMIT 1
+      ");
       $stmt->execute([$menuId]);
       $menu = $stmt->fetch(PDO::FETCH_ASSOC);
 
       if (!$menu) {
         http_response_code(404);
         echo json_encode(['error' => 'Menu introuvable'], JSON_UNESCAPED_UNICODE);
+        return;
+      }
+
+      // Stock
+      $stock = (int)($menu['stock_available'] ?? 0);
+      if ($stock <= 0) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Stock épuisé pour ce menu'], JSON_UNESCAPED_UNICODE);
         return;
       }
 
@@ -79,7 +122,9 @@ class OrderController
         return;
       }
 
-      // Calculs serveur
+      // ---------------------------
+      // Calcul prix (serveur)
+      // ---------------------------
       $basePrice = $unitPrice * $guests;
 
       // -10% si guests >= min_people + 5
@@ -87,19 +132,22 @@ class OrderController
         $basePrice *= 0.90;
       }
 
-      // Livraison +5 si city != Bordeaux (si city fournie)
+      // Livraison : 5€ + 0.59€/km si ville != Bordeaux
       $deliveryCost = 0.0;
-      if (isset($data['city']) && trim((string)$data['city']) !== '') {
-        $city = strtolower(trim((string)$data['city']));
-        if ($city !== 'bordeaux') $deliveryCost = 5.0;
+      $city = isset($data['city']) ? strtolower(trim((string)$data['city'])) : '';
+      $km   = isset($data['distance_km']) ? (float)$data['distance_km'] : 0.0;
+
+      if ($city !== '' && $city !== 'bordeaux') {
+        if ($km < 0) $km = 0;
+        $deliveryCost = 5.0 + (0.59 * $km);
       }
 
       $totalPrice = $basePrice + $deliveryCost;
 
-      // ✅ Transaction : SQL + NoSQL ensemble
+      // Transaction
       $pdo->beginTransaction();
 
-      // Insert SQL
+      // Insert order (statut = attente)
       $stmt = $pdo->prepare("
         INSERT INTO orders
           (user_id, menu_id, fullname, email, phone, address, prestation_date, prestation_time, guests,
@@ -118,23 +166,43 @@ class OrderController
         $data['prestation_date'],
         $data['prestation_time'],
         $guests,
-        $basePrice,
-        $deliveryCost,
-        $totalPrice,
-        'accepte'
+        round((float)$basePrice, 2),
+        round((float)$deliveryCost, 2),
+        round((float)$totalPrice, 2),
+        'attente'
       ]);
 
       $orderId = (int)$pdo->lastInsertId();
 
-      // Append NoSQL (orders.json)
+      // ✅ Historique : création
+      self::pushStatusHistory($pdo, $orderId, 'attente', 'Commande créée');
+
+      // Décrémenter stock
+      $stmt = $pdo->prepare("
+        UPDATE menus
+        SET stock_available = stock_available - 1
+        WHERE id = ? AND stock_available > 0
+      ");
+      $stmt->execute([$menuId]);
+
+      if ($stmt->rowCount() === 0) {
+        $pdo->rollBack();
+        http_response_code(400);
+        echo json_encode(['error' => 'Stock épuisé (conflit). Réessayez.'], JSON_UNESCAPED_UNICODE);
+        return;
+      }
+
+      // NoSQL
       self::appendNoSqlOrder([
-        'order_id'   => $orderId,
-        'user_id'    => $userId,
-        'menu_id'    => $menuId,
-        'menu_label' => (string)($menu['title'] ?? ("Menu #".$menuId)),
-        'total'      => round((float)$totalPrice, 2),
-        'status'     => 'accepte',
-        'created_at' => date('Y-m-d')
+        'order_id'      => $orderId,
+        'user_id'       => $userId,
+        'menu_id'       => $menuId,
+        'menu_label'    => (string)($menu['title'] ?? ("Menu #".$menuId)),
+        'total'         => round((float)$totalPrice, 2),
+        'delivery_cost' => round((float)$deliveryCost, 2),
+        'distance_km'   => round((float)$km, 2),
+        'status'        => 'attente',
+        'created_at'    => date('Y-m-d')
       ]);
 
       $pdo->commit();
@@ -143,12 +211,12 @@ class OrderController
         'success' => true,
         'message' => 'Commande enregistrée',
         'order_id' => $orderId,
-        'total_price' => round((float)$totalPrice, 2)
+        'total_price' => round((float)$totalPrice, 2),
+        'delivery_cost' => round((float)$deliveryCost, 2)
       ], JSON_UNESCAPED_UNICODE);
       return;
 
     } catch (Throwable $e) {
-      // rollback si transaction ouverte
       try {
         if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
           $pdo->rollBack();
@@ -164,17 +232,16 @@ class OrderController
     }
   }
 
-  // ✅ Commandes du client connecté
+  // ==========================
+  // ✅ Commandes du client
+  // ==========================
   public static function getMyOrders()
   {
     header('Content-Type: application/json; charset=utf-8');
 
     try {
       $token = AuthController::getBearerToken();
-      if (!$token) {
-        echo json_encode([], JSON_UNESCAPED_UNICODE);
-        return;
-      }
+      if (!$token) { echo json_encode([], JSON_UNESCAPED_UNICODE); return; }
 
       $pdo = pdo();
 
@@ -188,17 +255,12 @@ class OrderController
       $stmt->execute([$token]);
       $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-      if (!$user) {
-        echo json_encode([], JSON_UNESCAPED_UNICODE);
-        return;
-      }
+      if (!$user) { echo json_encode([], JSON_UNESCAPED_UNICODE); return; }
 
       $userId = (int)$user['id'];
 
       $stmt = $pdo->prepare("
-        SELECT
-          o.*,
-          m.title AS menu_name
+        SELECT o.*, m.title AS menu_name
         FROM orders o
         LEFT JOIN menus m ON m.id = o.menu_id
         WHERE o.user_id = ?
@@ -210,14 +272,13 @@ class OrderController
 
     } catch (Throwable $e) {
       http_response_code(500);
-      echo json_encode([
-        'error' => 'getMyOrders failed',
-        'detail' => $e->getMessage()
-      ], JSON_UNESCAPED_UNICODE);
+      echo json_encode(['error' => 'getMyOrders failed', 'detail' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
     }
   }
 
-  // ✅ Suivi client : GET /api/orders/{id}/status
+  // ==========================
+  // ✅ Suivi: order + history
+  // ==========================
   public static function getStatus(int $orderId)
   {
     header('Content-Type: application/json; charset=utf-8');
@@ -226,11 +287,18 @@ class OrderController
       $pdo = pdo();
 
       $stmt = $pdo->prepare("
-        SELECT id, status, prestation_date, prestation_time, updated_at
-        FROM orders
-        WHERE id = ?
-        LIMIT 1
-      ");
+  SELECT
+    id,
+    menu_id,
+    guests,
+    status,
+    prestation_date,
+    prestation_time,
+    updated_at
+    FROM orders
+    WHERE id = ?
+    LIMIT 1
+  ");
       $stmt->execute([$orderId]);
 
       $order = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -241,18 +309,22 @@ class OrderController
         return;
       }
 
-      echo json_encode($order, JSON_UNESCAPED_UNICODE);
+      $history = self::getHistory($pdo, $orderId);
+
+      echo json_encode([
+        'order' => $order,
+        'history' => $history
+      ], JSON_UNESCAPED_UNICODE);
 
     } catch (Throwable $e) {
       http_response_code(500);
-      echo json_encode([
-        'error' => 'getStatus failed',
-        'detail' => $e->getMessage()
-      ], JSON_UNESCAPED_UNICODE);
+      echo json_encode(['error' => 'getStatus failed', 'detail' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
     }
   }
 
-  // ✅ Annulation (employé/admin) : POST /api/orders/{id}/cancel
+  // ==========================
+  // ✅ Annuler (et historique)
+  // ==========================
   public static function cancel(int $orderId)
   {
     header('Content-Type: application/json; charset=utf-8');
@@ -282,7 +354,6 @@ class OrderController
         return;
       }
 
-      // Vérifier statut actuel
       $stmt = $pdo->prepare("SELECT status FROM orders WHERE id = ? LIMIT 1");
       $stmt->execute([$orderId]);
       $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -299,6 +370,9 @@ class OrderController
         return;
       }
 
+      // ✅ Transaction (update + history)
+      $pdo->beginTransaction();
+
       $stmt = $pdo->prepare("
         UPDATE orders
         SET status = 'annulee',
@@ -310,56 +384,84 @@ class OrderController
       ");
       $stmt->execute([$reason, $mode, $orderId]);
 
+      self::pushStatusHistory($pdo, $orderId, 'annulee', 'Annulation: ' . $reason);
+
+      $pdo->commit();
+
       echo json_encode(['success' => true, 'id' => $orderId], JSON_UNESCAPED_UNICODE);
 
     } catch (Throwable $e) {
+      try { if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) $pdo->rollBack(); } catch (Throwable $ignored) {}
       http_response_code(500);
-      echo json_encode([
-        'error' => 'cancel failed',
-        'detail' => $e->getMessage()
-      ], JSON_UNESCAPED_UNICODE);
+      echo json_encode(['error' => 'cancel failed', 'detail' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
     }
   }
 
-  // ✅ Update statut (employé/admin) : PUT /api/orders/{id}/status
+  // ==========================
+  // ✅ Update statut (et history)
+  // ==========================
   public static function updateStatus(int $orderId)
-  {
-    header('Content-Type: application/json; charset=utf-8');
+{
+  header('Content-Type: application/json; charset=utf-8');
 
-    try {
-      $pdo = pdo();
+  try {
+    $pdo = pdo();
 
-      $data = json_decode(file_get_contents('php://input'), true);
-      if (!$data || empty($data['status'])) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Status manquant'], JSON_UNESCAPED_UNICODE);
-        return;
-      }
-
-      $allowed = ['accepte', 'en_preparation', 'en_livraison', 'livre', 'attente_retour_materiel', 'terminee', 'annulee'];
-      $status = trim((string)$data['status']);
-
-      if (!in_array($status, $allowed, true)) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Status invalide'], JSON_UNESCAPED_UNICODE);
-        return;
-      }
-
-      $stmt = $pdo->prepare("UPDATE orders SET status = ?, updated_at = NOW() WHERE id = ?");
-      $stmt->execute([$status, $orderId]);
-
-      echo json_encode(['success' => true, 'id' => $orderId, 'status' => $status], JSON_UNESCAPED_UNICODE);
-
-    } catch (Throwable $e) {
-      http_response_code(500);
-      echo json_encode([
-        'error' => 'updateStatus failed',
-        'detail' => $e->getMessage()
-      ], JSON_UNESCAPED_UNICODE);
+    $data = json_decode(file_get_contents('php://input'), true);
+    if (!$data || empty($data['status'])) {
+      http_response_code(400);
+      echo json_encode(['error' => 'Status manquant'], JSON_UNESCAPED_UNICODE);
+      return;
     }
-  }
 
-  // ✅ Liste des commandes (employé/admin) + filtres
+    $allowed = ['attente','accepte','en_preparation','en_livraison','livre','attente_retour_materiel','terminee','annulee'];
+    $status = trim((string)$data['status']);
+
+    if (!in_array($status, $allowed, true)) {
+      http_response_code(400);
+      echo json_encode(['error' => 'Status invalide'], JSON_UNESCAPED_UNICODE);
+      return;
+    }
+
+    // ✅ récupérer l'ancien status (pour éviter d'écrire 2x la même chose)
+    $stmt = $pdo->prepare("SELECT status FROM orders WHERE id = ? LIMIT 1");
+    $stmt->execute([$orderId]);
+    $old = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$old) {
+      http_response_code(404);
+      echo json_encode(['error' => 'Commande introuvable'], JSON_UNESCAPED_UNICODE);
+      return;
+    }
+
+    if ($old['status'] === $status) {
+      echo json_encode(['success' => true, 'id' => $orderId, 'status' => $status], JSON_UNESCAPED_UNICODE);
+      return;
+    }
+
+    $pdo->beginTransaction();
+
+    $stmt = $pdo->prepare("UPDATE orders SET status = ?, updated_at = NOW() WHERE id = ?");
+    $stmt->execute([$status, $orderId]);
+
+    // ✅ Historique
+    self::pushStatusHistory($pdo, $orderId, $status, 'Changement de statut');
+
+    $pdo->commit();
+
+    echo json_encode(['success' => true, 'id' => $orderId, 'status' => $status], JSON_UNESCAPED_UNICODE);
+
+  } catch (Throwable $e) {
+    try { if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) $pdo->rollBack(); } catch(Throwable $ignored) {}
+
+    http_response_code(500);
+    echo json_encode(['error' => 'updateStatus failed', 'detail' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+  }
+}
+
+  // ==========================
+  // Liste des commandes (admin/employe)
+  // ==========================
   public static function listAll()
   {
     header('Content-Type: application/json; charset=utf-8');
@@ -372,25 +474,11 @@ class OrderController
 
       $sql = "
         SELECT
-          o.id,
-          o.user_id,
-          o.menu_id,
-          o.fullname,
-          o.email,
-          o.phone,
-          o.address,
-          o.prestation_date,
-          o.prestation_time,
-          o.guests,
-          o.base_price,
-          o.delivery_cost,
-          o.total_price,
-          o.created_at,
-          o.updated_at,
-          o.status,
-          o.cancel_reason,
-          o.cancel_contact_mode,
-          o.canceled_at,
+          o.id, o.user_id, o.menu_id, o.fullname, o.email, o.phone, o.address,
+          o.prestation_date, o.prestation_time, o.guests,
+          o.base_price, o.delivery_cost, o.total_price,
+          o.created_at, o.updated_at, o.status,
+          o.cancel_reason, o.cancel_contact_mode, o.canceled_at,
           m.title AS menu_title
         FROM orders o
         LEFT JOIN menus m ON m.id = o.menu_id
@@ -398,16 +486,8 @@ class OrderController
       ";
 
       $params = [];
-
-      if ($email !== '') {
-        $sql .= " AND o.email LIKE ?";
-        $params[] = "%$email%";
-      }
-
-      if ($status !== '') {
-        $sql .= " AND o.status = ?";
-        $params[] = $status;
-      }
+      if ($email !== '') { $sql .= " AND o.email LIKE ?"; $params[] = "%$email%"; }
+      if ($status !== '') { $sql .= " AND o.status = ?"; $params[] = $status; }
 
       $sql .= " ORDER BY o.id DESC";
 
@@ -418,52 +498,41 @@ class OrderController
 
     } catch (Throwable $e) {
       http_response_code(500);
-      echo json_encode([
-        'error' => 'listAll failed',
-        'detail' => $e->getMessage()
-      ], JSON_UNESCAPED_UNICODE);
+      echo json_encode(['error' => 'listAll failed', 'detail' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
     }
   }
 
-  // -----------------------
-  // NoSQL helpers (JSON file)
-  // -----------------------
+  // ==========================
+  // NoSQL helpers
+  // ==========================
   private static function appendNoSqlOrder(array $doc): void
-{
-  $dir  = __DIR__ . '/../nosql';
-  $file = $dir . '/orders.json';
-  $trace = $dir . '/trace.txt';
+  {
+    $dir   = __DIR__ . '/../nosql';
+    $file  = $dir . '/orders.json';
 
-  // 1) Créer dossier
-  if (!is_dir($dir)) {
-    if (!mkdir($dir, 0777, true) && !is_dir($dir)) {
-      throw new Exception("Impossible de créer le dossier: $dir");
+    if (!is_dir($dir)) {
+      if (!mkdir($dir, 0777, true) && !is_dir($dir)) {
+        throw new Exception("Impossible de créer le dossier: $dir");
+      }
+    }
+
+    if (!file_exists($file)) {
+      file_put_contents($file, "[]", LOCK_EX);
+    }
+
+    $raw = file_get_contents($file);
+    if ($raw === false || trim($raw) === '') $raw = "[]";
+
+    $data = json_decode($raw, true);
+    if (!is_array($data)) $data = [];
+
+    $data[] = $doc;
+
+    $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    $ok = file_put_contents($file, $json, LOCK_EX);
+
+    if ($ok === false) {
+      throw new Exception("Impossible d'écrire dans $file (permissions ?)");
     }
   }
-
-  // 2) Créer fichier s'il n'existe pas
-  if (!file_exists($file)) {
-    file_put_contents($file, "[]", LOCK_EX);
-  }
-
-  // Trace (pour vérifier que la fonction est appelée)
-  file_put_contents($trace, "append called => $file\n", FILE_APPEND);
-
-  // 3) Lire existant
-  $raw = file_get_contents($file);
-  if ($raw === false || trim($raw) === '') $raw = "[]";
-  $data = json_decode($raw, true);
-  if (!is_array($data)) $data = [];
-
-  // 4) Ajouter doc
-  $data[] = $doc;
-
-  // 5) Écrire avec verrou
-  $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-  $ok = file_put_contents($file, $json, LOCK_EX);
-
-  if ($ok === false) {
-    throw new Exception("Impossible d'écrire dans $file (permissions ?)");
-  }
- }
 }

@@ -35,33 +35,146 @@
     </nav>
 </header>
 
-<main class="container py-5" style="max-width:720px">
-  <h1 class="h3 mb-3 text-black">Contact</h1>
-  <div id="contact-alert"></div>
+<main class="container py-5">
+  <div class="text-center mb-4">
+    <h1 class="fw-bold">Contactez-nous</h1>
+    <p class="text-muted mb-0">
+      Notre équipe vous répond sous 24h pour toute demande d’information ou de devis personnalisé.
+    </p>
+  </div>
 
-  <form id="contact-form" class="card card-body shadow-sm" novalidate>
-    <div class="mb-3">
-      <label class="form-label" for="c-email">Votre e-mail</label>
-      <input type="email" class="form-control" id="c-email" placeholder="vous@mail.fr" required>
-      <div class="invalid-feedback">Saisissez un e-mail valide.</div>
+  <div id="contact-alert" class="alert d-none" role="alert" aria-live="polite"></div>
+
+  <!-- 2 colonnes -->
+  <div class="row g-4 align-items-start">
+    <!-- Form -->
+    <div class="col-lg-6">
+      <form id="contact-form" class="card shadow-sm border-0 p-4" novalidate>
+        <div class="mb-3">
+          <label class="form-label" for="c-name">Nom complet</label>
+          <input id="c-name" class="form-control" type="text" placeholder="Votre nom et prénom" required minlength="2" autocomplete="name">
+          <div class="invalid-feedback">Nom requis.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="c-email">Email</label>
+          <input id="c-email" class="form-control" type="email" placeholder="votre.email@exemple.com" required autocomplete="email">
+          <div class="invalid-feedback">Saisissez un email valide.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="c-subject">Sujet</label>
+          <input id="c-subject" class="form-control" type="text" placeholder="Objet de votre demande" required minlength="3">
+          <div class="invalid-feedback">Sujet requis (min 3 caractères).</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="c-message">Message</label>
+          <textarea id="c-message" class="form-control" rows="5" placeholder="Décrivez votre projet ou votre demande..." required minlength="10"></textarea>
+          <div class="invalid-feedback">Message requis (min 10 caractères).</div>
+        </div>
+
+        <button class="btn btn-primary px-4" type="submit" id="btn-contact">
+          Envoyer
+        </button>
+
+        <p class="small text-muted mt-3 mb-0">
+          Vos données sont traitées selon notre <a href="./mentions.html">politique de confidentialité</a>.
+        </p>
+      </form>
     </div>
 
-    <div class="mb-3">
-      <label class="form-label" for="c-subject">Sujet</label>
-      <input type="text" class="form-control" id="c-subject" placeholder="Sujet de votre demande" required>
-      <div class="invalid-feedback">Sujet requis.</div>
-    </div>
+    <!-- Coordonnées -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm border-0 p-4 mb-3">
+        <h2 class="h6 fw-bold mb-3">Nos coordonnées</h2>
 
-    <div class="mb-3">
-      <label class="form-label" for="c-message">Message</label>
-      <textarea class="form-control" id="c-message" rows="5" placeholder="Votre message…" required></textarea>
-      <div class="invalid-feedback">Message requis.</div>
-    </div>
+        <div class="d-flex gap-3 mb-3">
+          <div class="text-primary"><i class="bi bi-geo-alt"></i></div>
+          <div class="text-muted small">
+            123 Avenue de la République<br>
+            75011 Paris
+          </div>
+        </div>
 
-    <div class="text-end">
-      <button class="btn btn-primary" type="submit" id="btn-contact">Envoyer</button>
+        <div class="d-flex gap-3 mb-3">
+          <div class="text-primary"><i class="bi bi-telephone"></i></div>
+          <div class="text-muted small">01 23 45 67 89</div>
+        </div>
+
+        <div class="d-flex gap-3 mb-3">
+          <div class="text-primary"><i class="bi bi-envelope"></i></div>
+          <div class="text-muted small">contact@vite-gourmand.fr</div>
+        </div>
+
+        <div class="d-flex gap-3">
+          <div class="text-primary"><i class="bi bi-clock"></i></div>
+          <div class="text-muted small">
+            Lundi – Vendredi<br>
+            9h00 – 18h00
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0 p-4">
+        <h3 class="h6 fw-bold mb-2">Besoin d’un devis ?</h3>
+        <p class="small text-muted mb-0">
+          Pour un devis personnalisé, indiquez la date, le nombre de personnes et vos préférences culinaires.
+        </p>
+      </div>
     </div>
-  </form>
+  </div>
+
+<!-- Image section -->
+  <section class="team-section my-5">
+  <div class="container">
+    <div class="team-image-wrapper">
+      <img
+        src="./images/photo-1759673824858-d4050871d322.jpeg"
+        alt="Notre équipe Vite & Gourmand en cuisine"
+        class="team-image"
+        loading="lazy"
+      />
+
+      <div class="team-overlay">
+        <h2>Une équipe passionnée à votre service</h2>
+        <p>
+          Nos chefs et notre équipe mettent leur savoir-faire au service
+          de votre événement.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+    <!-- Map -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm p-3 h-100">
+        <div class="text-center small text-muted mb-2">
+          <i class="bi bi-geo-alt"></i> Carte Google Maps
+        </div>
+
+        <section class="mt-5">
+  <h2 class="h5 mb-3">Nous trouver</h2>
+
+  <div class="ratio ratio-16x9 rounded overflow-hidden shadow-sm">
+    <iframe
+      src="https://www.google.com/maps?q=123%20Rue%20Sainte-Catherine%2033000%20Bordeaux&output=embed"
+      style="border:0;"
+      allowfullscreen
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"
+      aria-label="Carte – 123 Rue Sainte-Catherine, 33000 Bordeaux">
+    </iframe>
+  </div>
+</section>
+
+        <div class="text-center small text-muted mt-2">
+          123 Rue Sainte-Catherine, 33000 Bordeaux
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
 
 <footer class="mt-auto py-5 border-top" style="background:#F3F4F6">
@@ -75,7 +188,7 @@
           <div class="fw-semibold mb-2">Contact</div>
           <div class="text-muted">📞 01 23 45 67 89</div>
           <div class="text-muted">✉️ contact@vite-gourmand.fr</div>
-          <div class="text-muted">📍 123 Avenue de la République, 75011 Paris</div>
+          <div class="text-muted">📍 123 Rue Sainte-Catherine, 33000 Bordeaux</div>
         </div>
         <div class="col-md-3">
           <div class="fw-semibold mb-2">Horaires</div>
@@ -94,7 +207,9 @@
       <hr class="my-4" />
       <div class="d-flex justify-content-between flex-wrap gap-2 text-muted">
         <div>© Vite & Gourmand</div>
-        <div><a class="text-decoration-none" href="./mentions.html">Mentions légales</a></div>
+        <div><a class="text-decoration-none" href="./mentions.html">Mentions légales</a>
+             <a href="cgv.html">Conditions générales de vente</a>
+        </div>
       </div>
     </div>
   </footer>

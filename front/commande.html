@@ -60,7 +60,7 @@
         </div>
         <div class="col-md-6">
           <label>GSM</label>
-          <input id="ord-phone" class="form-control" required placeholder="06xxxxxxxx">
+          <input id="ord-phone" class="form-control" required placeholder="06xxxxxxxx" disabled>
         </div>
       </div>
 
@@ -78,16 +78,19 @@
           <input type="text" id="ord-city" class="form-control" required>
         </div>
         <div class="col-md-6">
+          <label>Distance depuis Bordeaux (km)</label>
+          <input type="number" id="ord-distance" class="form-control" readonly>
+          <div class="form-text">
+              Calculée automatiquement depuis Bordeaux
+          </div>
+        </div>
+        <div class="col-md-6">
           <label>Date livraison</label>
           <input type="date" id="ord-date" class="form-control" required>
         </div>
         <div class="col-md-6">
           <label>Heure livraison</label>
           <input type="time" id="ord-time" class="form-control" required>
-        </div>
-        <div class="col-md-6">
-          <label>Lieu</label>
-          <input type="text" id="ord-place" class="form-control" required>
         </div>
       </div>
 
@@ -144,7 +147,7 @@
           <div class="fw-semibold mb-2">Contact</div>
           <div class="text-muted">📞 01 23 45 67 89</div>
           <div class="text-muted">✉️ contact@vite-gourmand.fr</div>
-          <div class="text-muted">📍 123 Avenue de la République, 75011 Paris</div>
+          <div class="text-muted">📍 123 Rue Sainte-Catherine, 33000 Bordeaux</div>
         </div>
         <div class="col-md-3">
           <div class="fw-semibold mb-2">Horaires</div>
@@ -163,7 +166,9 @@
       <hr class="my-4" />
       <div class="d-flex justify-content-between flex-wrap gap-2 text-muted">
         <div>© Vite & Gourmand</div>
-        <div><a class="text-decoration-none" href="./mentions.html">Mentions légales</a></div>
+        <div><a class="text-decoration-none" href="./mentions.html">Mentions légales</a>
+             <a href="cgv.html">Conditions générales de vente</a>
+        </div>
       </div>
     </div>
   </footer>

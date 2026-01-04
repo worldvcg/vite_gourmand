@@ -27,13 +27,40 @@
     togglePwdBtn.textContent = isPwd ? 'Masquer' : 'Afficher';
   });
 
-  // Mot de passe oublié (simulation)
-  forgotLink?.addEventListener('click', (e) => {
-    e.preventDefault();
-    const mail = emailInput.value.trim();
-    if (!mail) return showAlert('Entrez d’abord votre e-mail dans le champ.', 'warning');
-    showAlert(`Si un compte ${mail} existe, un lien de réinitialisation a été envoyé (simulation).`, 'info');
-  });
+  // Mot de passe oublié (API)
+forgotLink?.addEventListener('click', async (e) => {
+  e.preventDefault();
+  clearAlert();
+
+  const mail = emailInput.value.trim();
+  if (!mail) return showAlert('Entrez d’abord votre e-mail dans le champ.', 'warning');
+
+  try {
+    showAlert('Envoi du lien…', 'info');
+
+    const res = await fetch(API + '/api/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify({ email: mail })
+    });
+
+    const ct = (res.headers.get('content-type') || '').toLowerCase();
+    const payload = ct.includes('application/json') ? await res.json() : { error: await res.text() };
+
+    if (!res.ok) throw new Error(payload.error || 'Erreur serveur');
+
+    // message neutre (comme le cahier des charges)
+    showAlert('Si un compte existe, un lien de réinitialisation a été envoyé.', 'success');
+
+    // DEV: si ton back renvoie debug_reset_link, tu peux l’afficher
+    if (payload.debug_reset_link) {
+      console.log('DEBUG reset link:', payload.debug_reset_link);
+    }
+
+  } catch (err) {
+    showAlert(err.message, 'danger');
+  }
+});
 
   // Validation simple
   function validate() {

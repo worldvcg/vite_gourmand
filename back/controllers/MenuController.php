@@ -30,7 +30,6 @@ class MenuController {
             ");
 
             $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
             echo json_encode($menus, JSON_UNESCAPED_UNICODE);
 
         } catch (Throwable $e) {
@@ -38,7 +37,7 @@ class MenuController {
             echo json_encode([
                 'error' => 'Erreur récupération menus',
                 'detail' => $e->getMessage()
-            ]);
+            ], JSON_UNESCAPED_UNICODE);
         }
     }
 
@@ -46,46 +45,57 @@ class MenuController {
     // GET /api/menus/{id}
     // =========================
     public static function detail(int $id) {
-        header('Content-Type: application/json; charset=utf-8');
+  header('Content-Type: application/json; charset=utf-8');
 
-        try {
-            $pdo = pdo();
+  try {
+    $pdo = pdo();
 
-            $stmt = $pdo->prepare("
-                SELECT
-                    id,
-                    title,
-                    description,
-                    theme,
-                    regime,
-                    min_people,
-                    base_price,
-                    stock_available,
-                    conditions_text,
-                    image
-                FROM menus
-                WHERE id = ?
-            ");
-            $stmt->execute([$id]);
+    // 1) Menu
+    $stmt = $pdo->prepare("
+      SELECT
+        id, title, description, theme, regime, min_people,
+        base_price, stock_available, conditions_text, image
+      FROM menus
+      WHERE id = ?
+      LIMIT 1
+    ");
+    $stmt->execute([$id]);
+    $menu = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            $menu = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if (!$menu) {
-                http_response_code(404);
-                echo json_encode(['error' => 'Menu introuvable']);
-                return;
-            }
-
-            echo json_encode($menu, JSON_UNESCAPED_UNICODE);
-
-        } catch (Throwable $e) {
-            http_response_code(500);
-            echo json_encode([
-                'error' => 'Erreur récupération menu',
-                'detail' => $e->getMessage()
-            ]);
-        }
+    if (!$menu) {
+      http_response_code(404);
+      echo json_encode(['error' => 'Menu introuvable'], JSON_UNESCAPED_UNICODE);
+      return;
     }
+
+    // 2) Dishes liés au menu (via menu_dishes)
+    $stmt = $pdo->prepare("
+      SELECT
+        d.id,
+        d.name,
+        d.type,
+        d.description
+      FROM menu_dishes md
+      JOIN dishes d ON d.id = md.dish_id
+      WHERE md.menu_id = ?
+      ORDER BY FIELD(d.type, 'entrée', 'plat', 'dessert'), d.name
+    ");
+    $stmt->execute([$id]);
+    $dishes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // 3) Retour complet
+    $menu['dishes'] = $dishes;
+
+    echo json_encode($menu, JSON_UNESCAPED_UNICODE);
+
+  } catch (Throwable $e) {
+    http_response_code(500);
+    echo json_encode([
+      'error' => 'Erreur récupération menu',
+      'detail' => $e->getMessage()
+    ], JSON_UNESCAPED_UNICODE);
+  }
+}
 
     // =========================
     // POST /api/menus
@@ -94,9 +104,9 @@ class MenuController {
         header('Content-Type: application/json; charset=utf-8');
 
         $data = json_decode(file_get_contents('php://input'), true);
-        if (!$data) {
+        if (!is_array($data)) {
             http_response_code(400);
-            echo json_encode(['error' => 'JSON invalide']);
+            echo json_encode(['error' => 'JSON invalide'], JSON_UNESCAPED_UNICODE);
             return;
         }
 
@@ -110,7 +120,7 @@ class MenuController {
             ");
 
             $stmt->execute([
-                $data['title'] ?? '',
+                trim((string)($data['title'] ?? '')),
                 $data['description'] ?? null,
                 $data['theme'] ?? 'Classique',
                 $data['regime'] ?? 'classique',
@@ -123,15 +133,15 @@ class MenuController {
 
             echo json_encode([
                 'success' => true,
-                'id' => $pdo->lastInsertId()
-            ]);
+                'id' => (int)$pdo->lastInsertId()
+            ], JSON_UNESCAPED_UNICODE);
 
         } catch (Throwable $e) {
             http_response_code(500);
             echo json_encode([
                 'error' => 'Erreur création menu',
                 'detail' => $e->getMessage()
-            ]);
+            ], JSON_UNESCAPED_UNICODE);
         }
     }
 
@@ -142,9 +152,9 @@ class MenuController {
         header('Content-Type: application/json; charset=utf-8');
 
         $data = json_decode(file_get_contents('php://input'), true);
-        if (!$data) {
+        if (!is_array($data)) {
             http_response_code(400);
-            echo json_encode(['error' => 'JSON invalide']);
+            echo json_encode(['error' => 'JSON invalide'], JSON_UNESCAPED_UNICODE);
             return;
         }
 
@@ -166,7 +176,7 @@ class MenuController {
             ");
 
             $stmt->execute([
-                $data['title'] ?? '',
+                trim((string)($data['title'] ?? '')),
                 $data['description'] ?? null,
                 $data['theme'] ?? 'Classique',
                 $data['regime'] ?? 'classique',
@@ -178,14 +188,14 @@ class MenuController {
                 $id
             ]);
 
-            echo json_encode(['success' => true]);
+            echo json_encode(['success' => true], JSON_UNESCAPED_UNICODE);
 
         } catch (Throwable $e) {
             http_response_code(500);
             echo json_encode([
                 'error' => 'Erreur mise à jour menu',
                 'detail' => $e->getMessage()
-            ]);
+            ], JSON_UNESCAPED_UNICODE);
         }
     }
 
@@ -200,14 +210,14 @@ class MenuController {
             $stmt = $pdo->prepare("DELETE FROM menus WHERE id = ?");
             $stmt->execute([$id]);
 
-            echo json_encode(['success' => true]);
+            echo json_encode(['success' => true], JSON_UNESCAPED_UNICODE);
 
         } catch (Throwable $e) {
             http_response_code(500);
             echo json_encode([
                 'error' => 'Erreur suppression menu',
                 'detail' => $e->getMessage()
-            ]);
+            ], JSON_UNESCAPED_UNICODE);
         }
     }
 }

@@ -14,6 +14,15 @@
   const minEl = document.getElementById('menu-min');
   const btn = document.getElementById('btn-commander');
 
+  const themeEl = document.getElementById('menu-theme');
+  const regimeEl = document.getElementById('menu-regime');
+  const stockEl = document.getElementById('menu-stock');
+
+  
+  const listEntrees = document.getElementById('list-entrees');
+  const listPlats = document.getElementById('list-plats');
+  const listDesserts = document.getElementById('list-desserts');
+
   function setAlert(type, msg) {
     alertBox.className = `alert alert-${type}`;
     alertBox.textContent = msg;
@@ -33,8 +42,61 @@
     return '/vite_gourmand/front/' + s.replace(/^\.?\//, '');
   }
 
+  function applyStock(stockValue) {
+    const stock = Number(stockValue);
+
+    if (stockEl) stockEl.textContent = Number.isFinite(stock) ? String(stock) : '—';
+
+    if (Number.isFinite(stock) && stock <= 0) {
+      btn.disabled = true;
+      btn.textContent = 'Menu indisponible (stock épuisé)';
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-secondary');
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Commander ce menu';
+      btn.classList.add('btn-primary');
+      btn.classList.remove('btn-secondary');
+    }
+  }
+
+  function renderDishList(ul, dishes) {
+    if (!ul) return;
+
+    ul.innerHTML = '';
+
+    if (!dishes || dishes.length === 0) {
+      const li = document.createElement('li');
+      li.className = 'text-muted';
+      li.textContent = 'Aucun élément';
+      ul.appendChild(li);
+      return;
+    }
+
+    for (const d of dishes) {
+      const li = document.createElement('li');
+      li.className = 'mb-2';
+
+      const allergens = Array.isArray(d.allergens) && d.allergens.length
+        ? ` • Allergènes : ${d.allergens.join(', ')}`
+        : '';
+
+      li.innerHTML = `
+        <strong>${d.name ?? 'Plat'}</strong>
+        ${d.description ? `<div class="text-muted small">${d.description}</div>` : ''}
+        ${allergens ? `<div class="small text-danger">${allergens}</div>` : ''}
+      `;
+      ul.appendChild(li);
+    }
+  }
+
   async function loadMenu() {
     try {
+      if (!menuId) {
+        setAlert('danger', 'ID du menu manquant');
+        return;
+      }
+
       const res = await fetch(API + `/api/menus/${menuId}`, { cache: 'no-store' });
       const data = await res.json();
 
@@ -43,15 +105,31 @@
         return;
       }
 
-      // ✅ Champs DB
       nameEl.textContent = data.title ?? 'Menu';
       descEl.textContent = data.description ?? '';
       priceEl.textContent = Number(data.base_price ?? 0).toFixed(2);
-      condEl.textContent = data.conditions_text ?? '';
       minEl.textContent = data.min_people ?? '—';
+
+      condEl.textContent = data.conditions_text ? data.conditions_text : 'Aucune condition particulière';
+
+      if (themeEl) themeEl.textContent = data.theme ?? '—';
+      if (regimeEl) regimeEl.textContent = data.regime ?? '—';
 
       imgEl.src = resolveImg(data.image);
       imgEl.classList.remove('d-none');
+
+      applyStock(data.stock_available);
+
+      // ✅ plats
+      const dishes = Array.isArray(data.dishes) ? data.dishes : [];
+
+      const entrees = dishes.filter(d => d.type === 'entrée');
+      const plats = dishes.filter(d => d.type === 'plat');
+      const desserts = dishes.filter(d => d.type === 'dessert');
+
+      renderDishList(listEntrees, entrees);
+      renderDishList(listPlats, plats);
+      renderDishList(listDesserts, desserts);
 
     } catch (e) {
       console.error(e);
@@ -67,6 +145,8 @@
       window.location.href = 'login.html';
       return;
     }
+
+    if (btn.disabled) return;
 
     window.location.href = `commande.html?menu=${menuId}`;
   });
