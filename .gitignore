@@ -19,3 +19,6 @@ node_modules/
 # Env
 .env
 .env.local
+
+.upsun/local/
+.platform/local/

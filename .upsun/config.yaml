@@ -1,3 +1,30 @@
-project:
-  id: 2rwm6mwrbmknw
-  host: fr-4.platform.sh
+applications:
+  vite-gourmand:
+    type: "php:8.2"
+
+    relationships:
+      database: "db:mysql"
+
+    web:
+      locations:
+        "/":
+          root: "front"
+          index:
+            - "index.html"
+
+        "/api":
+          root: "back/public"
+          passthru: "/index.php"
+
+        "/index.php":
+          root: "back/public"
+          passthru: "/index.php"
+
+services:
+  db:
+    type: "mysql:8.0"
+
+routes:
+  "https://{default}/":
+    type: upstream
+    upstream: "vite-gourmand:http"
