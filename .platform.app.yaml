@@ -1,23 +1,25 @@
 name: vite-gourmand
-type: php:8.2
 
-relationships:
-  database: "db:mysql"
+type: php:8.2
 
 web:
   locations:
     "/":
-      root: "front"
-      index:
-        - index.html
-      allow: true
+      root: public
+      passthru: /index.php
 
-    "/index.php":
-      root: "back/public"
-      passthru: "/index.php"
-      allow: true
+disk: 512
 
-    "/api":
-      root: "back/public"
-      passthru: "/index.php"
-      allow: true
+relationships:
+  database: "db:mysql"
+
+mounts:
+  "/var/cache": "shared:files/cache"
+  "/var/log": "shared:files/log"
+
+hooks:
+  build: |
+    echo "Build OK"
+
+  deploy: |
+    php bin/console doctrine:migrations:migrate --no-interaction || true
