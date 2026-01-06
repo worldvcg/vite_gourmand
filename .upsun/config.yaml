@@ -1,6 +1,6 @@
 applications:
   vite-gourmand:
-    type: "php:8.2"
+    type: php:8.2
 
     relationships:
       database: "db:mysql"
@@ -11,18 +11,16 @@ applications:
           root: "front"
           index:
             - "index.html"
+          allow: true
 
         "/api":
           root: "back/public"
           passthru: "/index.php"
-
-        "/index.php":
-          root: "back/public"
-          passthru: "/index.php"
+          allow: true
 
 services:
   db:
-    type: "mysql:8.0"
+    type: mysql:8.0
 
 routes:
   "https://{default}/":
