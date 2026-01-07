@@ -1,2 +1,2 @@
 db:
-  service: mysql:8.0
+  type: mysql:8.0
