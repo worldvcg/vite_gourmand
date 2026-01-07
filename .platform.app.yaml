@@ -1,5 +1,5 @@
-name: "vite-gourmand"
-type: "php:8.2"
+name: app
+type: php:8.2
 
 relationships:
   database: "db:mysql"
@@ -9,10 +9,12 @@ web:
     "/":
       root: "front"
       index:
-        - "index.html"
+        - index.html
       allow: true
 
     "/api":
       root: "back/public"
       passthru: "/index.php"
       allow: true
+
+disk: 1024
