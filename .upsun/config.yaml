@@ -1,28 +1,35 @@
+# Upsun configuration, generated using AI at: 2026-01-07T03:02:19+01:00
+# AI can make mistakes. Please modify this file to suit your needs.
 applications:
-  vite-gourmand:
-    type: php:8.2
+  back:
+    type: php:8.5
 
-    relationships:
-      database: "db:mysql"
+    build:
+      flavor: none
+
+    hooks:
+      build: |
+        set -ex
+        composer install --no-dev --no-interaction --no-progress
 
     web:
       locations:
-        "/":
-          root: "front"
-          index:
-            - "index.html"
-          allow: true
+        /:
+          root: back/public
+          passthru: /index.php
 
-        "/api":
-          root: "back/public"
-          passthru: "/index.php"
-          allow: true
+    mounts:
+      back/storage:
+        source: storage
+
+    relationships:
+      database: {}
 
 services:
-  db:
-    type: mysql:8.0
+  database:
+    type: mariadb:11.8
 
 routes:
-  "https://{default}/":
+  https://{default}/:
     type: upstream
-    upstream: "vite-gourmand:http"
+    upstream: back:http
