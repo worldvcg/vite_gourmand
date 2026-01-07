@@ -1,5 +1,6 @@
 name: app
 type: php:8.2
+disk: 1024
 
 relationships:
   database: "db:mysql"
@@ -9,7 +10,7 @@ web:
     "/":
       root: "front"
       index:
-        - index.html
+        - "index.html"
       allow: true
 
     "/api":
@@ -20,5 +21,3 @@ web:
 hooks:
   build: |
     echo "No composer for this project"
-
-disk: 1024
