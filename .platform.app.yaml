@@ -17,4 +17,8 @@ web:
       passthru: "/index.php"
       allow: true
 
+hooks:
+  build: |
+    echo "No composer for this project"
+
 disk: 1024
