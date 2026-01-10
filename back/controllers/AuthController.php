@@ -239,8 +239,8 @@ public static function updateMe() {
       'error' => 'updateMe failed',
       'detail' => $e->getMessage()
     ], JSON_UNESCAPED_UNICODE);
-  }
-}
+  }}
+
 
     public static function logout() {
         header('Content-Type: application/json');
