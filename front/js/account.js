@@ -214,7 +214,7 @@ document.querySelectorAll('.btn-modifier').forEach(btn => {
   }
 
   async function cancelOrder(id) {
-    setAlert('info', 'Fonction annulation: à brancher avec ton endpoint + payload (motif + contact).');
+    setAlert('info', 'Pour annuler une commande, merci de contacter notre équipe. (Voir coordonnées en bas de page).');
   }
 
   async function showTracking(id) {
