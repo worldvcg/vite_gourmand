@@ -353,7 +353,7 @@ public static function forgotPassword() {
         $stmt = $pdo->prepare("INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)");
         $stmt->execute([$email, $token, $expiresAt]);
 
-        $resetLink = self::frontUrl('/reset-password.html') . '?token=' . urlencode($token);
+        $resetLink = 'https://jean-baptiste.alwaysdata.net/reset-password.html?token=' . urlencode($token);
 
         @mail($email, "Réinitialisation de mot de passe", "Cliquez ici : $resetLink");
 
