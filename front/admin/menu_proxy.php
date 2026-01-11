@@ -7,7 +7,7 @@ $id = $data['id'] ?? null;
 $payload = $data['payload'] ?? [];
 $token = $data['authToken'] ?? null;
 
-$base = 'http://localhost:9000/index.php?route=/api/menus';
+$base = 'https://jean-baptiste.alwaysdata.net/api/back/public/index.php?route=/api/menus';
 
 $method = 'GET';
 $url = $base;

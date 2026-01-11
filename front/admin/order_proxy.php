@@ -3,7 +3,7 @@ require_once __DIR__ . '/../../back/config/db.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-$API = 'http://localhost:8888/vite_gourmand/back/public/index.php?route=';
+$API = 'https://jean-baptiste.alwaysdata.net/api/back/public/index.php?route=';
 
 $raw = file_get_contents('php://input');
 $body = json_decode($raw, true) ?? [];
