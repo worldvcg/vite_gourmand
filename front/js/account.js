@@ -1,5 +1,7 @@
+  import { API_BASE } from "./config.js";
+  const API = API_BASE;
+
 (() => {
-  const API = 'http://localhost:9000/index.php?route=';
 
   const token = (localStorage.getItem('authToken') || '').trim();
   if (!token) {

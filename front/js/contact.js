@@ -1,5 +1,8 @@
+
+  import { API_BASE } from "./config.js";
+  const API = API_BASE;
+
 (() => {
-  const API_BASE = 'http://localhost:9000/index.php?route=';
 
   const $form  = document.getElementById('contact-form');
   const $email = document.getElementById('c-email');

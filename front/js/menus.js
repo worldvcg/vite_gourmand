@@ -1,3 +1,7 @@
+
+  import { API_BASE } from "./config.js";
+  const API = API_BASE;
+
 const $list     = document.getElementById('menus-list');
 const $priceMax = document.getElementById('f-price-max');
 const $priceMin = document.getElementById('f-price-min');
@@ -6,7 +10,6 @@ const $theme    = document.getElementById('f-theme');
 const $regime   = document.getElementById('f-regime');
 const $minPers  = document.getElementById('f-min-pers');
 
-const API_BASE = 'http://localhost:9000/index.php?route=';
 
 let MENUS = [];
 

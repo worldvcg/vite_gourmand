@@ -1,5 +1,6 @@
+  import { API_BASE } from "./config.js";
+  const API = API_BASE;
 const USERS_KEY = 'vg_users';
-const API = 'http://localhost:9000/index.php?route=';
 
 // UI
 const $form = document.getElementById('register-form');
