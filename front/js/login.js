@@ -117,7 +117,9 @@ form.addEventListener('submit', async (e) => {
     localStorage.setItem('authToken', payload.token);
     localStorage.setItem('user', JSON.stringify(payload.user));
 
-    const BASE = 'http://localhost:8888/vite_gourmand/front/';
+    const BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+    ? "http://localhost:8888/vite_gourmand/front/"
+    : (location.origin + "/");
     const next = new URLSearchParams(location.search).get('next') || (BASE + 'account.html');
 
 // 🔒 redirection propre (pas d’historique pollué)

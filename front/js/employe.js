@@ -417,7 +417,7 @@ async function loadReviews() {
     const qs = new URLSearchParams();
     if (status) qs.set('status', status);
 
-    const url = `http://localhost:9000/index.php?route=/api/reviews${qs.toString() ? '&' + qs.toString() : ''}`;
+    const url = `${API}/api/reviews${qs.toString() ? '&' + qs.toString() : ''}`;
 
     const res = await fetch(url, { cache: 'no-store' });
     const data = await res.json();
@@ -494,7 +494,7 @@ async function moderateReview(id, status) {
   }
 
   try {
-    const res = await fetch(`http://localhost:9000/index.php?route=/api/reviews/${id}/moderate`, {
+    const res = await fetch(`${API}/api/reviews/${id}/moderate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status, moderation_reason: reason })
@@ -527,7 +527,7 @@ async function loadHours() {
   if (!hoursBox) return;
 
   try {
-    const res = await fetch('http://localhost:9000/index.php?route=/api/opening-hours', { cache: 'no-store' });
+    const res = await fetch(`${API}/api/opening-hours`, { cache: 'no-store' });
     const data = await res.json();
 
     if (!res.ok) {
@@ -598,7 +598,7 @@ document.getElementById('hoursForm')?.addEventListener('submit', async (e) => {
   const close_time = document.getElementById('hours-close').value;
 
   try {
-    const res = await fetch(`http://localhost:9000/index.php?route=/api/opening-hours/${id}`, {
+    const res = await fetch(`${API}/api/opening-hours/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -647,7 +647,7 @@ async function loadDishes() {
   if (!dishesBox) return;
 
   try {
-    const res = await fetch('http://localhost:9000/index.php?route=/api/dishes', { cache: 'no-store' });
+    const res = await fetch(`${API}/api/dishes`, { cache: 'no-store' });
     const data = await res.json();
 
     if (!res.ok) {
@@ -758,8 +758,8 @@ dishForm?.addEventListener('submit', async (e) => {
 
   try {
     const url = id
-      ? `http://localhost:9000/index.php?route=/api/dishes/${id}`
-      : `http://localhost:9000/index.php?route=/api/dishes`;
+      ? `${API}/api/dishes/${id}`
+      : `${API}/api/dishes`;
 
     const method = id ? 'PUT' : 'POST';
 
@@ -788,7 +788,7 @@ async function deleteDish(id) {
   if (!confirm('Supprimer ce plat ?')) return;
 
   try {
-    const res = await fetch(`http://localhost:9000/index.php?route=/api/dishes/${id}`, {
+    const res = await fetch(`${API}/api/dishes/${id}`, {
       method: 'DELETE'
     });
 

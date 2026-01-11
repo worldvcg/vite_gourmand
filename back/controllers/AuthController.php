@@ -76,6 +76,31 @@ class AuthController {
     ], JSON_UNESCAPED_UNICODE);
 }
 
+private static function baseUrl(): string {
+  // Optionnel : si tu définis une variable d'env
+  $env = getenv('FRONT_BASE_URL');
+  if ($env && trim($env) !== '') return rtrim(trim($env), '/');
+
+  $isHttps =
+    (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443)
+    || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+
+  $scheme = $isHttps ? 'https' : 'http';
+  $host = $_SERVER['HTTP_HOST'] ?? '';
+
+  if ($host !== '') return $scheme . '://' . $host . '/vite_gourmand/front';
+
+  // fallback dev
+  return 'http://localhost:8888/vite_gourmand/front';
+}
+
+private static function frontUrl(string $path): string {
+  $base = self::baseUrl();
+  $path = '/' . ltrim($path, '/');
+  return rtrim($base, '/') . $path;
+}
+
     public static function login() {
         header('Content-Type: application/json');
         $data = json_decode(file_get_contents('php://input'), true);
@@ -307,46 +332,53 @@ public static function forgotPassword() {
 
         $pdo = pdo();
 
-        // Vérifier si l'utilisateur existe (sans leak d’info)
         $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
         $stmt->execute([$email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Réponse neutre même si l’utilisateur n’existe pas
         if (!$user) {
-            echo json_encode(['success' => true, 'message' => 'Si un compte existe, un lien sera envoyé.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode([
+                'success' => true,
+                'message' => 'Si un compte existe, un lien sera envoyé.'
+            ], JSON_UNESCAPED_UNICODE);
             return;
         }
 
-        // Supprimer anciens tokens pour cet email (propre)
         $stmt = $pdo->prepare("DELETE FROM password_resets WHERE email = ?");
         $stmt->execute([$email]);
 
-        // Générer un token
-        $token = bin2hex(random_bytes(32)); // 64 chars
+        $token = bin2hex(random_bytes(32));
         $expiresAt = (new DateTime('+1 hour'))->format('Y-m-d H:i:s');
 
-        // Insérer token
         $stmt = $pdo->prepare("INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)");
         $stmt->execute([$email, $token, $expiresAt]);
 
-        // Lien de reset (front)
-        $resetLink = "http://localhost:8888/vite_gourmand/front/reset-password.html?token=" . urlencode($token);
+        $resetLink = self::frontUrl('/reset-password.html') . '?token=' . urlencode($token);
 
-        // ✅ Envoi mail (DEV)
-        // En local, mail() peut ne pas fonctionner → on renvoie le lien en debug.
-        // En prod, utilise PHPMailer / SMTP.
         @mail($email, "Réinitialisation de mot de passe", "Cliquez ici : $resetLink");
 
-        echo json_encode([
+        $appEnv = getenv('APP_ENV') ?: '';
+        $isDev = ($appEnv === 'dev') || (strpos(self::baseUrl(), 'localhost') !== false);
+
+        $payload = [
             'success' => true,
-            'message' => 'Si un compte existe, un lien sera envoyé.',
-            'debug_reset_link' => $resetLink // tu peux enlever en prod
-        ], JSON_UNESCAPED_UNICODE);
+            'message' => 'Si un compte existe, un lien sera envoyé.'
+        ];
+
+        if ($isDev) {
+            $payload['debug_reset_link'] = $resetLink;
+        }
+
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+        return;
 
     } catch (Throwable $e) {
         http_response_code(500);
-        echo json_encode(['error' => 'forgotPassword failed', 'detail' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        echo json_encode([
+            'error' => 'forgotPassword failed',
+            'detail' => $e->getMessage()
+        ], JSON_UNESCAPED_UNICODE);
+        return;
     }
 }
 
