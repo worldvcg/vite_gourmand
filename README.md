@@ -39,9 +39,9 @@ Outils
 
 vite_gourmand/
 │
-├── database/           # Interface utilisateur (HTML/CSS/JS)
-├── back/           # API + logique serveur (PHP)
-├── front/       # Fichier SQL (structure + données)
+├── front/              # Interface utilisateur (HTML / CSS / JS)
+├── back/               # API + logique serveur (PHP)
+├── database/           # Fichier SQL (structure + données)
 ├── README.md
 └── .gitignore
 
@@ -108,6 +108,11 @@ Client
 	•	Validation des données côté serveur
 	•	Accès API protégé par Authorization Header
 
+⚠️ Paiement
+Dans le cadre de ce projet ECF, aucun système de paiement réel n’est intégré.
+Le choix du mode de paiement est simulé afin de respecter le périmètre pédagogique,
+tout en conservant une structure évolutive vers une solution réelle (Stripe, PayPal).
+
 
 🧪 Fonctionnalités principales
 
@@ -132,12 +137,13 @@ Administrateur
 
 
 🌍 Déploiement
-	•	Application déployée : (lien à compléter)
-	•	Dépôt GitHub public : https://github.com/worldvcg/vite_gourmand   
+	•	Application déployée : https://jean-baptiste.alwaysdata.net/
+	•	Dépôt GitHub public : https://github.com/worldvcg/vite_gourmand 
 
     📋 Gestion de projet
 	•	Méthode : Kanban
-	•	Outil : Trello : https://trello.com/invite/b/68f9eddc36985c423b501f20 ATTI4f96529100442d33b3f2d1f27d62df482A0844A8/vite-gourmand-ecf
+	•	Outil : Trello
+	•	Lien : https://trello.com/invite/b/68f9eddc36985c423b501f20/ATTI4f96529100442d33b3f2d1f27d62df482A0844A8/vite-gourmand-ecf 
 	•	Fonctionnalités développées par branches :
 	•	develop
 	•	feature/*
@@ -153,6 +159,9 @@ Administrateur
 
 
 👨‍💻 Auteur
+
+Ce projet démontre la capacité à concevoir, développer, sécuriser et déployer
+une application web complète, conforme à un cahier des charges, dans un contexte professionnel.
 
 Jean-Baptiste Lanusse
 Projet réalisé dans le cadre de l’ECF Studi – Développement Web
