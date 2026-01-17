@@ -157,6 +157,7 @@ Administrateur
 	•	Documentation technique (PDF)
 	•	Documentation gestion de projet (PDF)
 
+La charte graphique du projet Vite & Gourmand ainsi que l’ensemble des maquettes (wireframes et mockups) sont regroupées dans un document PDF unique.
 
 👨‍💻 Auteur
 
