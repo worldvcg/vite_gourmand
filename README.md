@@ -159,6 +159,14 @@ Administrateur
 
 La charte graphique du projet Vite & Gourmand ainsi que l’ensemble des maquettes (wireframes et mockups) sont regroupées dans un document PDF unique.
 
+✅ Mise à jour (janvier 2026)
+
+- Ajout d’une structure back-end plus claire (séparation Controller / Service / Repository) afin de mieux respecter les responsabilités de chaque couche et améliorer la maintenabilité.
+- Ajout d’un environnement Docker (optionnel) pour lancer rapidement l’application en local sans dépendre de MAMP.
+
+⚠️ Docker est fourni uniquement pour faciliter l’installation en local.
+Le déploiement en production est effectué sur AlwaysData (PHP/MySQL).
+
 👨‍💻 Auteur
 
 Ce projet démontre la capacité à concevoir, développer, sécuriser et déployer
