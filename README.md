@@ -86,20 +86,6 @@ API (exemple): http://localhost:9000/index.php?route=/api/menus
 
 L’API est servie via le serveur PHP intégré sur le port 9000 afin de séparer le front et le back.
 
-👤 Comptes de démonstration
-
-Administrateur
-	•	Email : admin@demo.fr
-	•	Mot de passe : Passw0rd!!!!!!
-
-Employé
-	•	Email : employe@demo.fr
-	•	Mot de passe : Passw0rd!!!!!!
-
-Client
-	•	Email : client@demo.fr
-	•	Mot de passe : Passw0rd!!!!!!
-
 🔐 Sécurité mise en place
 	•	Hash des mots de passe (password_hash)
 	•	Authentification par token
